@@ -2,17 +2,17 @@
 
 [English version](#english)
 
-Full-stack разработчик: Python и TypeScript. Больше 7 лет пишу код на заказ, в основном на фрилансе, и сейчас беру новые проекты.
+Full-stack разработчик: Python и TypeScript, больше 7 лет коммерческой разработки. Делаю веб-продукты целиком, от схемы базы данных до продакшена, и сейчас беру новые проекты.
 В проектах ниже много кода на случай, если вебхук или платёж доставлен дважды, два refresh-запроса пришли одновременно, воркер упал посреди задачи или оборвалось соединение.
 
-На заказ делаю:
-- связки сайта, CRM и мессенджеров: amoCRM, Bitrix24, Tilda, МойСклад, Google Sheets, Telegram;
-- Telegram-ботов и Mini App, в том числе с оплатой в Stars;
-- веб-приложения и админки: CRM, личные кабинеты, дашборды;
-- парсеры, выгрузки и отчёты в Excel, где итоги считают формулы;
-- ответы по базе знаний со ссылками на источник и автоматизацию в n8n.
+Чем занимаюсь:
+- продукты с нуля: MVP, SaaS, CRM, личные кабинеты, внутренние системы;
+- бэкенд и API: очереди и фоновые задачи, авторизация, платежи, PostgreSQL и Redis;
+- интеграции сайта, CRM и мессенджеров: amoCRM, Bitrix24, Tilda, МойСклад, Google Sheets, Telegram;
+- AI: ответы по документам со ссылками на источник, ассистенты, локальные модели, n8n;
+- Telegram-боты и Mini App, парсеры и отчёты в Excel.
 
-Коммерческий код остаётся у заказчиков, поэтому здесь открытые демо на выдуманных данных, собранные вокруг тех же задач. Сроки и цены — на [странице портфолио](https://sinnercode228.github.io/portfolio/#services).
+Работаю проектом с фиксированной ценой, почасово или помесячно, могу войти в вашу команду или разобраться в чужом коде и довести его до релиза. Коммерческий код остаётся у заказчиков, поэтому здесь открытые проекты на выдуманных данных. Форматы работы — на [странице портфолио](https://sinnercode228.github.io/portfolio/#services).
 
 <p>
   <a href="https://sinnercode228.github.io/pulse-analytics/"><img src="https://raw.githubusercontent.com/sinnercode228/portfolio/main/assets/projects/pulse-analytics/cover.webp" width="32%" alt="Pulse, дашборд аналитики"></a>
@@ -62,12 +62,12 @@ LLM: Claude API, OpenAI-совместимые API, Ollama, Qdrant, n8n\
 
 ### English
 
-Full-stack developer, Python and TypeScript. I've been doing client work for more than 7 years, mostly freelance, and I'm taking on new projects.
+Full-stack developer, Python and TypeScript, with more than 7 years of commercial work. I build web products end to end, from the database schema to production, and I'm taking on new projects.
 The projects above spend a lot of code on failure cases: a webhook or payment delivered twice, two refresh requests at once, a worker dying mid-job, a dropped connection.
 
-What I build for clients: integrations between sites, CRMs and messengers (amoCRM, Bitrix24, Tilda, MoySklad, Google Sheets, Telegram), Telegram bots and Mini Apps with Stars payments, web apps and admin panels, scrapers and Excel reports where the totals are formulas, answers over a knowledge base with source citations, and n8n automation.
+What I work on: products from scratch (MVPs, SaaS, CRMs, customer portals, internal systems), backends and APIs (queues and background jobs, auth, payments, PostgreSQL and Redis), integrations between sites, CRMs and messengers (amoCRM, Bitrix24, Tilda, MoySklad, Google Sheets, Telegram), AI (answers from documents with source citations, assistants, local models, n8n), plus Telegram bots and Mini Apps, scrapers and Excel reports.
 
-Client code stays with clients, so these are open demos on made-up data, built around the same kinds of tasks. Every project has an English README next to the Russian one.
+I work on fixed-price projects, by the hour or by the month, as part of your team, or on taking over someone else's code and getting it to release. Client code stays with clients, so these are open projects on made-up data. Every project has an English README next to the Russian one.
 
 - [Pulse](https://github.com/sinnercode228/pulse-analytics) · [demo](https://sinnercode228.github.io/pulse-analytics/): cookieless web analytics with an 843-byte tracker (560 bytes gzipped) and uptime monitoring. Each rollup row carries a HyperLogLog sketch: an exact set up to 512 hashes, then 2048 registers with about 2.3% standard error.
 - [Relay](https://github.com/sinnercode228/integration-hub) · [demo](https://sinnercode228.github.io/integration-hub/): takes webhooks from Tilda, amoCRM and Bitrix24 and delivers them to Telegram, Google Sheets, amoCRM and e-mail. The queue runs on Redis sorted sets; a job that a worker takes gets a 120-second lease and goes back to the queue if the worker dies.
@@ -79,4 +79,4 @@ The demos are static builds on GitHub Pages with the backend replaced by code in
 
 Also: [n8n workflows](https://github.com/sinnercode228/n8n-home-ai-workflows) (meeting notes to Notion with Claude, document Q&A on local Ollama and Qdrant; mock-run, not tried against live accounts) and four smaller demos in [portfolio](https://github.com/sinnercode228/portfolio): a landing page with a house cost calculator, an async scraper, a lead-capture bot and an Excel dashboard built on formulas. 1,047 tests across all of them, run by GitHub Actions.
 
-Services, timelines and prices: [sinnercode228.github.io/portfolio](https://sinnercode228.github.io/portfolio/?lang=en#services). Contact: Telegram [@sinnercode](https://t.me/sinnercode).
+Ways to work together: [sinnercode228.github.io/portfolio](https://sinnercode228.github.io/portfolio/?lang=en#services). Contact: Telegram [@sinnercode](https://t.me/sinnercode).
