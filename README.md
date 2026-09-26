@@ -1,7 +1,18 @@
-Full-stack разработчик: Python и TypeScript.
+# Грешный Котик
+
+[English version](#english)
+
+Full-stack разработчик: Python и TypeScript. Больше 7 лет пишу код на заказ, в основном на фрилансе, и сейчас беру новые проекты.
 В проектах ниже много кода на случай, если вебхук или платёж доставлен дважды, два refresh-запроса пришли одновременно, воркер упал посреди задачи или оборвалось соединение.
 
-Связываю amoCRM, Bitrix24, Tilda и МойСклад через вебхуки и API, пишу Telegram-ботов и Mini App. С LLM сделал RAG по документам и воркфлоу для n8n на Claude и локальной Ollama.
+На заказ делаю:
+- связки сайта, CRM и мессенджеров: amoCRM, Bitrix24, Tilda, МойСклад, Google Sheets, Telegram;
+- Telegram-ботов и Mini App, в том числе с оплатой в Stars;
+- веб-приложения и админки: CRM, личные кабинеты, дашборды;
+- парсеры, выгрузки и отчёты в Excel, где итоги считают формулы;
+- ответы по базе знаний со ссылками на источник и автоматизацию в n8n.
+
+Коммерческий код остаётся у заказчиков, поэтому здесь открытые демо на выдуманных данных, собранные вокруг тех же задач. Сроки и цены — на [странице портфолио](https://sinnercode228.github.io/portfolio/#services).
 
 <p>
   <a href="https://sinnercode228.github.io/pulse-analytics/"><img src="https://raw.githubusercontent.com/sinnercode228/portfolio/main/assets/projects/pulse-analytics/cover.webp" width="32%" alt="Pulse, дашборд аналитики"></a>
@@ -34,7 +45,6 @@ Full-stack разработчик: Python и TypeScript.
 [n8n-home-ai-workflows](https://github.com/sinnercode228/n8n-home-ai-workflows) — четыре воркфлоу для n8n: заметки со встреч в Notion через Claude, дайджест семейных календарей, вопросы по домашним документам на локальных Ollama и Qdrant, обработчик ошибок. С живыми аккаунтами Anthropic, Notion и Google их не запускал; мок-прогоны исполняют настоящий `jsCode` из JSON воркфлоу в `vm`.
 
 В [portfolio](https://github.com/sinnercode228/portfolio) ещё четыре демо поменьше: лендинг с калькулятором стоимости дома ([демо](https://sinnercode228.github.io/portfolio/landing-calculator/)), асинхронный парсер books.toscrape.com с выгрузкой в XLSX, CSV и JSON, Telegram-бот для заявок и Excel-дашборд из CSV, где каждая цифра считается формулой.
-Все демо собраны на [sinnercode228.github.io/portfolio](https://sinnercode228.github.io/portfolio/), есть [английская версия](https://sinnercode228.github.io/portfolio/?lang=en).
 
 ### Стек
 
@@ -44,6 +54,29 @@ TypeScript: Fastify, Prisma, zod, React 19, Next.js, Vite, TanStack Query, Zusta
 LLM: Claude API, OpenAI-совместимые API, Ollama, Qdrant, n8n\
 Проверки и инфраструктура: pytest, Vitest, mypy (strict), ruff, GitHub Actions, Docker Compose, nginx
 
-Все проекты на этой странице — пет-проекты на выдуманных данных. Тестов в них 1047, и в каждом репозитории их гоняет GitHub Actions.
+Тестов во всех демо 1047, в каждом репозитории их гоняет GitHub Actions. У каждого проекта рядом с README лежит английская версия.
 
-Telegram: [@sinnercode](https://t.me/sinnercode)
+Обсудить задачу: Telegram [@sinnercode](https://t.me/sinnercode)
+
+---
+
+### English
+
+Full-stack developer, Python and TypeScript. I've been doing client work for more than 7 years, mostly freelance, and I'm taking on new projects.
+The projects above spend a lot of code on failure cases: a webhook or payment delivered twice, two refresh requests at once, a worker dying mid-job, a dropped connection.
+
+What I build for clients: integrations between sites, CRMs and messengers (amoCRM, Bitrix24, Tilda, MoySklad, Google Sheets, Telegram), Telegram bots and Mini Apps with Stars payments, web apps and admin panels, scrapers and Excel reports where the totals are formulas, answers over a knowledge base with source citations, and n8n automation.
+
+Client code stays with clients, so these are open demos on made-up data, built around the same kinds of tasks. Every project has an English README next to the Russian one.
+
+- [Pulse](https://github.com/sinnercode228/pulse-analytics) · [demo](https://sinnercode228.github.io/pulse-analytics/): cookieless web analytics with an 843-byte tracker (560 bytes gzipped) and uptime monitoring. Each rollup row carries a HyperLogLog sketch: an exact set up to 512 hashes, then 2048 registers with about 2.3% standard error.
+- [Relay](https://github.com/sinnercode228/integration-hub) · [demo](https://sinnercode228.github.io/integration-hub/): takes webhooks from Tilda, amoCRM and Bitrix24 and delivers them to Telegram, Google Sheets, amoCRM and e-mail. The queue runs on Redis sorted sets; a job that a worker takes gets a 120-second lease and goes back to the queue if the worker dies.
+- [DocMind](https://github.com/sinnercode228/docmind-rag) · [demo](https://sinnercode228.github.io/docmind-rag/): RAG over PDF, DOCX and web pages. Sources arrive over SSE before the first answer token, so a `[n]` citation already has its card on screen when it appears.
+- [Zernolist](https://github.com/sinnercode228/tg-shop-miniapp) · [demo](https://sinnercode228.github.io/tg-shop-miniapp/): a coffee and tea shop inside Telegram with Stars payments. The server re-prices every order from the catalog, so a test that sends `price: 1` still gets a 1290 ₽ subtotal.
+- [FlowDesk](https://github.com/sinnercode228/flowdesk-crm) · [demo](https://sinnercode228.github.io/flowdesk-crm/): a CRM with a deals kanban. Refresh tokens rotate, a reused token revokes the whole session, and a conditional `updateMany` inside a transaction closes the race between two concurrent refreshes.
+
+The demos are static builds on GitHub Pages with the backend replaced by code in the browser. Relay's events and failures come from a separate simulation, and DocMind's demo has no LLM: it searches with BM25 and assembles answers from the sentences it finds.
+
+Also: [n8n workflows](https://github.com/sinnercode228/n8n-home-ai-workflows) (meeting notes to Notion with Claude, document Q&A on local Ollama and Qdrant; mock-run, not tried against live accounts) and four smaller demos in [portfolio](https://github.com/sinnercode228/portfolio): a landing page with a house cost calculator, an async scraper, a lead-capture bot and an Excel dashboard built on formulas. 1,047 tests across all of them, run by GitHub Actions.
+
+Services, timelines and prices: [sinnercode228.github.io/portfolio](https://sinnercode228.github.io/portfolio/?lang=en#services). Contact: Telegram [@sinnercode](https://t.me/sinnercode).
