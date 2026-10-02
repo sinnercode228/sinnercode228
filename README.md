@@ -1,82 +1,72 @@
-# Грешный Котик
+# sinnercode
 
-[English version](#english)
+[По-русски](#по-русски)
 
-Full-stack разработчик: Python и TypeScript, больше 7 лет коммерческой разработки. Делаю веб-продукты целиком, от схемы базы данных до продакшена, и сейчас беру новые проекты.
-В проектах ниже много кода на случай, если вебхук или платёж доставлен дважды, два refresh-запроса пришли одновременно, воркер упал посреди задачи или оборвалось соединение.
+I have done commercial web development since 2019. Now I build web products end to end and work on existing systems. The public projects below cover APIs, integrations, Telegram bots and Mini Apps, and LLM features.
 
-Чем занимаюсь:
-- продукты с нуля: MVP, SaaS, CRM, личные кабинеты, внутренние системы;
-- бэкенд и API: очереди и фоновые задачи, авторизация, платежи, PostgreSQL и Redis;
-- интеграции сайта, CRM и мессенджеров: amoCRM, Bitrix24, Tilda, МойСклад, Google Sheets, Telegram;
-- AI: ответы по документам со ссылками на источник, ассистенты, локальные модели, n8n;
-- Telegram-боты и Mini App, парсеры и отчёты в Excel.
+## Experience
 
-Работаю проектом с фиксированной ценой, почасово или помесячно, могу войти в вашу команду или разобраться в чужом коде и довести его до релиза. Коммерческий код остаётся у заказчиков, поэтому здесь открытые проекты на выдуманных данных. Форматы работы — на [странице портфолио](https://sinnercode228.github.io/portfolio/#services).
+**2025 – now · Senior Full-Stack Developer · Independent / Contract**\
+Full-cycle web products and work on existing systems: architecture, dashboards and admin panels, APIs and integrations, optimizing queries, job queues and large imports, CI/CD, monitoring, backup and restore, code review, refactoring and releases.
 
-<p>
-  <a href="https://sinnercode228.github.io/pulse-analytics/"><img src="https://raw.githubusercontent.com/sinnercode228/portfolio/main/assets/projects/pulse-analytics/cover.webp" width="32%" alt="Pulse, дашборд аналитики"></a>
-  <a href="https://sinnercode228.github.io/tg-shop-miniapp/"><img src="https://raw.githubusercontent.com/sinnercode228/portfolio/main/assets/projects/tg-shop-miniapp/cover.webp" width="32%" alt="Zernolist, магазин в Telegram"></a>
-  <a href="https://sinnercode228.github.io/flowdesk-crm/"><img src="https://raw.githubusercontent.com/sinnercode228/portfolio/main/assets/projects/flowdesk-crm/cover.webp" width="32%" alt="FlowDesk, канбан сделок"></a>
-</p>
+**2023 – 2025 · Full-Stack Developer · Independent projects and contracts**\
+Services with subscriptions, payments and automation: a SaaS for links and contacts, a Telegram sales platform with automatic delivery of digital goods, a website analytics service. I designed the API and database, built the UI, deployed and supported them. Next.js, TypeScript, Node.js, Python, PostgreSQL, Redis, Nginx.
 
-- **[Pulse](https://github.com/sinnercode228/pulse-analytics)** · [демо](https://sinnercode228.github.io/pulse-analytics/)\
-  Аналитика сайтов без cookies с трекером на 843 байта (560 в gzip) и аптайм-мониторингом. Посетителей в каждой строке роллапа считает [HyperLogLog-скетч](https://github.com/sinnercode228/pulse-analytics/blob/main/packages/core/src/hll.ts), который до 512 хэшей хранит их точным множеством, а дальше переходит на 2048 регистров со стандартной ошибкой около 2,3%.\
-  TypeScript, Fastify, node:sqlite, WebSocket, React, uPlot
+**2021 – 2023 · Full-Stack Developer · Contract development**\
+Internal web apps for sales departments and service companies: a CRM for handling requests, a document portal with approvals, supplier catalog sync with price and stock updates. React, TypeScript, Node.js, PostgreSQL, Redis, Docker.
 
-- **[Relay](https://github.com/sinnercode228/integration-hub)** · [демо](https://sinnercode228.github.io/integration-hub/)\
-  Принимает вебхуки Tilda, amoCRM и Bitrix24 и разносит их в Telegram, Google Sheets, amoCRM и на почту. Очередь своя, [на sorted sets в Redis](https://github.com/sinnercode228/integration-hub/blob/main/backend/src/relay/queue/redis.py): взятая задача переезжает в отдельный ZSET с дедлайном через 120 секунд, и если воркер упадёт, после дедлайна она вернётся в очередь.\
-  Python, FastAPI, Redis, SQLite, React
+**2019 – 2021 · Web Developer · Freelance**\
+Websites and online stores for small businesses: an auto parts store with CSV import, a site for a chain of repair shops with a cost calculator and requests sent to a CRM, WordPress sites with custom themes. JavaScript, PHP, WordPress, MySQL.
 
-- **[DocMind](https://github.com/sinnercode228/docmind-rag)** · [демо](https://sinnercode228.github.io/docmind-rag/)\
-  RAG-ассистент по PDF, DOCX и веб-страницам. Источники приходят по SSE [раньше первого токена ответа](https://github.com/sinnercode228/docmind-rag/blob/main/backend/src/docmind/rag/service.py#L110-L111), и когда в тексте появляется сноска `[n]`, её карточка уже на экране.\
-  Python, FastAPI, pgvector, Claude или OpenAI-совместимый API, React, бот на aiogram
+The commercial code from this work is private, so the public repositories below are standalone projects built on made-up data.
 
-- **[Zernolist](https://github.com/sinnercode228/tg-shop-miniapp)** · [демо](https://sinnercode228.github.io/tg-shop-miniapp/)\
-  Магазин кофе и чая внутри Telegram с оплатой в Stars. Сервер [пересчитывает каждый заказ по каталогу](https://github.com/sinnercode228/tg-shop-miniapp/blob/main/bot/tgshop/services/orders.py#L76-L97), поэтому тест шлёт `price: 1` и всё равно получает подытог 1290 ₽.\
-  Mini App на React и Tailwind, бот и API на aiogram 3 + FastAPI, SQLAlchemy
+## Public projects
 
-- **[FlowDesk](https://github.com/sinnercode228/flowdesk-crm)** · [демо](https://sinnercode228.github.io/flowdesk-crm/)\
-  CRM с канбаном сделок. Refresh-токены ротируются, повторно использованный токен отзывает всю сессию, а гонку двух одновременных refresh закрывает [условный `updateMany` в транзакции](https://github.com/sinnercode228/flowdesk-crm/blob/main/server/src/modules/auth/auth.service.ts#L44-L51).\
-  Next.js, Fastify, Prisma, PostgreSQL, TanStack Query, dnd-kit
+The demos run on GitHub Pages without a backend. The API is replaced by code in the browser.
 
-Демо лежат на GitHub Pages статикой, бэкенд в них заменён кодом в браузере; у Relay события и сбои генерирует отдельная симуляция. У DocMind в демо нет LLM: поиск идёт по BM25, ответ собирается из найденных предложений.
+**[Pulse](https://github.com/sinnercode228/pulse-analytics)** · TypeScript, Fastify, SQLite, React · [demo](https://sinnercode228.github.io/pulse-analytics/)\
+Cookieless web analytics with uptime monitoring. Each rollup row stores a [HyperLogLog sketch](https://github.com/sinnercode228/pulse-analytics/blob/main/packages/core/src/hll.ts#L3-L7): an exact set up to 512 hashes, then 2048 registers. That is how unique visitors are merged across time buckets.
 
-[n8n-home-ai-workflows](https://github.com/sinnercode228/n8n-home-ai-workflows) — четыре воркфлоу для n8n: заметки со встреч в Notion через Claude, дайджест семейных календарей, вопросы по домашним документам на локальных Ollama и Qdrant, обработчик ошибок. С живыми аккаунтами Anthropic, Notion и Google их не запускал; мок-прогоны исполняют настоящий `jsCode` из JSON воркфлоу в `vm`.
+**[Relay](https://github.com/sinnercode228/integration-hub)** · Python, FastAPI, Redis, SQLite, React · [demo](https://sinnercode228.github.io/integration-hub/)\
+Takes webhooks from Tilda, amoCRM and Bitrix24 and delivers them to Telegram, Google Sheets, amoCRM and email. The [Redis queue is built on sorted sets](https://github.com/sinnercode228/integration-hub/blob/main/backend/src/relay/queue/redis.py#L43-L71): a worker claims a job with a lease (120 seconds by default), and if the worker dies, the job goes back to the queue when the lease runs out.
 
-В [portfolio](https://github.com/sinnercode228/portfolio) ещё четыре демо поменьше: лендинг с калькулятором стоимости дома ([демо](https://sinnercode228.github.io/portfolio/landing-calculator/)), асинхронный парсер books.toscrape.com с выгрузкой в XLSX, CSV и JSON, Telegram-бот для заявок и Excel-дашборд из CSV, где каждая цифра считается формулой.
+**[DocMind](https://github.com/sinnercode228/docmind-rag)** · Python, FastAPI, pgvector, React · [demo](https://sinnercode228.github.io/docmind-rag/)\
+Answers questions over PDF, DOCX, HTML files and web pages with citations, and has a Telegram bot. [Sources go out over SSE before the model is called](https://github.com/sinnercode228/docmind-rag/blob/main/backend/src/docmind/rag/service.py#L110-L111), so each `[n]` is clickable as soon as it streams in. The demo has no LLM: it searches with BM25 in the browser.
 
-### Стек
+**[Zernolist](https://github.com/sinnercode228/tg-shop-miniapp)** · React, aiogram 3, FastAPI, SQLAlchemy · [demo](https://sinnercode228.github.io/tg-shop-miniapp/)\
+A coffee and tea shop inside Telegram, with payment in Stars or on receipt. The server [prices every order from the catalog](https://github.com/sinnercode228/tg-shop-miniapp/blob/main/bot/tgshop/services/orders.py#L76-L100) and ignores client prices: a test sends `price: 1` and still gets the catalog subtotal.
 
-Python: FastAPI, aiogram 3, SQLAlchemy 2, Pydantic, httpx, openpyxl\
-TypeScript: Fastify, Prisma, zod, React 19, Next.js, Vite, TanStack Query, Zustand, Tailwind\
-Данные: PostgreSQL, pgvector, SQLite, Redis\
-LLM: Claude API, OpenAI-совместимые API, Ollama, Qdrant, n8n\
-Проверки и инфраструктура: pytest, Vitest, mypy (strict), ruff, GitHub Actions, Docker Compose, nginx
+**[FlowDesk](https://github.com/sinnercode228/flowdesk-crm)** · Next.js, Fastify, Prisma, PostgreSQL · [demo](https://sinnercode228.github.io/flowdesk-crm/)\
+A CRM with a deals kanban and roles. Refresh tokens rotate, and a reused one revokes every token from that login. A [conditional `updateMany` inside a transaction](https://github.com/sinnercode228/flowdesk-crm/blob/main/server/src/modules/auth/auth.service.ts#L44-L51) stops two concurrent refreshes from both getting a new pair.
 
-Тестов во всех демо 1047, в каждом репозитории их гоняет GitHub Actions. У каждого проекта рядом с README лежит английская версия.
+**[n8n-home-ai-workflows](https://github.com/sinnercode228/n8n-home-ai-workflows)** · n8n, Ollama, Qdrant, Docker Compose\
+Four workflows: meeting notes to Notion via Claude, a family calendar digest, document Q&A on local models, an error handler. Code-node logic is built from ES modules, and the [tests run the `jsCode` stored in the workflow JSON](https://github.com/sinnercode228/n8n-home-ai-workflows/blob/main/tests/harness.mjs#L51). No live demo, and I haven't run the workflows against live Anthropic, Notion, Google or Telegram accounts.
 
-Обсудить задачу: Telegram [@sinnercode](https://t.me/sinnercode)
+Smaller demos are in [portfolio](https://github.com/sinnercode228/portfolio): a landing page with a cost calculator, an async scraper, a lead-collection bot and an Excel dashboard.
+
+## Open issues
+
+Bugs I filed against my own projects and haven't fixed yet:
+
+- [FlowDesk: a second tab gets logged out after a token refresh in the first](https://github.com/sinnercode228/flowdesk-crm/issues/1)
+- [Relay: an event is stored but never queued if enqueue fails](https://github.com/sinnercode228/integration-hub/issues/1)
+- [DocMind: `docmind ask` finds nothing after `docmind ingest` with default settings](https://github.com/sinnercode228/docmind-rag/issues/1)
+
+## Contact
+
+Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercode228.github.io/portfolio/?lang=en)
 
 ---
 
-### English
+## По-русски
 
-Full-stack developer, Python and TypeScript, with more than 7 years of commercial work. I build web products end to end, from the database schema to production, and I'm taking on new projects.
-The projects above spend a lot of code on failure cases: a webhook or payment delivered twice, two refresh requests at once, a worker dying mid-job, a dropped connection.
+Коммерческая веб-разработка с 2019 года. Сейчас занимаюсь разработкой веб-продуктов полного цикла и развитием существующих систем. В открытых проектах выше — API, интеграции, Telegram-боты и Mini Apps, функции на LLM.
 
-What I work on: products from scratch (MVPs, SaaS, CRMs, customer portals, internal systems), backends and APIs (queues and background jobs, auth, payments, PostgreSQL and Redis), integrations between sites, CRMs and messengers (amoCRM, Bitrix24, Tilda, MoySklad, Google Sheets, Telegram), AI (answers from documents with source citations, assistants, local models, n8n), plus Telegram bots and Mini Apps, scrapers and Excel reports.
+- **2025 — сейчас.** Senior Full-Stack Developer, independent / contract. Полный цикл разработки веб-продуктов и развитие существующих систем.
+- **2023–2025.** Full-Stack Developer, независимые проекты и контракты. Сервисы с подписками, платёжными интеграциями и автоматизацией.
+- **2021–2023.** Full-Stack Developer, контрактная разработка. Внутренние веб-приложения для отделов продаж и сервисных компаний.
+- **2019–2021.** Web Developer, фриланс. Сайты и интернет-магазины для малого бизнеса.
 
-I work on fixed-price projects, by the hour or by the month, as part of your team, or on taking over someone else's code and getting it to release. Client code stays with clients, so these are open projects on made-up data. Every project has an English README next to the Russian one.
+Коммерческий код из этой работы закрыт, поэтому открытые репозитории выше — самостоятельные проекты на выдуманных данных. У каждого есть описание на русском.
 
-- [Pulse](https://github.com/sinnercode228/pulse-analytics) · [demo](https://sinnercode228.github.io/pulse-analytics/): cookieless web analytics with an 843-byte tracker (560 bytes gzipped) and uptime monitoring. Each rollup row carries a HyperLogLog sketch: an exact set up to 512 hashes, then 2048 registers with about 2.3% standard error.
-- [Relay](https://github.com/sinnercode228/integration-hub) · [demo](https://sinnercode228.github.io/integration-hub/): takes webhooks from Tilda, amoCRM and Bitrix24 and delivers them to Telegram, Google Sheets, amoCRM and e-mail. The queue runs on Redis sorted sets; a job that a worker takes gets a 120-second lease and goes back to the queue if the worker dies.
-- [DocMind](https://github.com/sinnercode228/docmind-rag) · [demo](https://sinnercode228.github.io/docmind-rag/): RAG over PDF, DOCX and web pages. Sources arrive over SSE before the first answer token, so a `[n]` citation already has its card on screen when it appears.
-- [Zernolist](https://github.com/sinnercode228/tg-shop-miniapp) · [demo](https://sinnercode228.github.io/tg-shop-miniapp/): a coffee and tea shop inside Telegram with Stars payments. The server re-prices every order from the catalog, so a test that sends `price: 1` still gets a 1290 ₽ subtotal.
-- [FlowDesk](https://github.com/sinnercode228/flowdesk-crm) · [demo](https://sinnercode228.github.io/flowdesk-crm/): a CRM with a deals kanban. Refresh tokens rotate, a reused token revokes the whole session, and a conditional `updateMany` inside a transaction closes the race between two concurrent refreshes.
-
-The demos are static builds on GitHub Pages with the backend replaced by code in the browser. Relay's events and failures come from a separate simulation, and DocMind's demo has no LLM: it searches with BM25 and assembles answers from the sentences it finds.
-
-Also: [n8n workflows](https://github.com/sinnercode228/n8n-home-ai-workflows) (meeting notes to Notion with Claude, document Q&A on local Ollama and Qdrant; mock-run, not tried against live accounts) and four smaller demos in [portfolio](https://github.com/sinnercode228/portfolio): a landing page with a house cost calculator, an async scraper, a lead-capture bot and an Excel dashboard built on formulas. 1,047 tests across all of them, run by GitHub Actions.
-
-Ways to work together: [sinnercode228.github.io/portfolio](https://sinnercode228.github.io/portfolio/?lang=en#services). Contact: Telegram [@sinnercode](https://t.me/sinnercode).
+Написать: Telegram [@sinnercode](https://t.me/sinnercode), [портфолио](https://sinnercode228.github.io/portfolio/).
