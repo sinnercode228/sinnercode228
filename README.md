@@ -48,7 +48,6 @@ Smaller demos are in [portfolio](https://github.com/sinnercode228/portfolio): a 
 
 Bugs I filed against my own projects and haven't fixed yet:
 
-- [FlowDesk: a second tab gets logged out after a token refresh in the first](https://github.com/sinnercode228/flowdesk-crm/issues/1)
 - [Relay: an event is stored but never queued if enqueue fails](https://github.com/sinnercode228/integration-hub/issues/1)
 - [DocMind: `docmind ask` finds nothing after `docmind ingest` with default settings](https://github.com/sinnercode228/docmind-rag/issues/1)
 
