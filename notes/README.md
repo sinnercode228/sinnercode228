@@ -2,6 +2,8 @@
 
 Write-ups on how specific parts of my public projects work. Each one quotes the code it describes and links to the exact lines at a fixed commit, then lists what the tests cover and where the code is still thin.
 
+- [My Redis queue claimed jobs atomically and still handed the same job to two workers](relay-queue-races.md)\
+  Two races in Relay's queue: `MULTI` made the claim atomic but not the read it was based on. A test hook that forces both interleavings on every run, the Lua fix, and a third gap still pinned with a strict xfail.
 - [Relay's delivery queue on two Redis sorted sets with a 120-second lease](relay-redis-lease-queue.md)\
   How a worker leases a job instead of popping it, why the attempt is saved before the ack, the intake gap from issue #1, and two claim races that only show up with several workers.
 - [How FlowDesk rotates refresh tokens with a conditional UPDATE and a cross-tab lock](flowdesk-refresh-rotation.md)\
@@ -17,6 +19,7 @@ Write-ups on how specific parts of my public projects work. Each one quotes the 
 
 Разборы того, как устроены отдельные части моих открытых проектов. В каждом я цитирую код со ссылками на строки в конкретном коммите, а в конце пишу, что покрывают тесты и где код пока слабый.
 
+- [Очередь на Redis атомарно забирала задачи и всё равно отдавала одну и ту же двум воркерам](relay-queue-races.ru.md)
 - [Очередь доставок Relay на двух sorted set в Redis с арендой задачи на 120 секунд](relay-redis-lease-queue.ru.md)
 - [Ротация refresh-токенов в FlowDesk через условный UPDATE и блокировку между вкладками](flowdesk-refresh-rotation.ru.md)
 - [Как Zernolist считает цену заказа на сервере и принимает каждый платёж в Telegram Stars один раз](zernolist-stars-payments.ru.md)

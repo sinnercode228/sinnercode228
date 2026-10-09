@@ -125,6 +125,8 @@ If `add_event` fails, the key is released and the sender's retry is accepted. If
 
 ## Two races between a read and a transaction
 
+Update: both races are fixed in [`b0ae35c`](https://github.com/sinnercode228/integration-hub/commit/b0ae35c14d753930be6c89155cdc75d31b861ff6), with one Lua script for the claim and one for the requeue. How I forced them in a test and what is still open: [My Redis queue claimed jobs atomically and still handed the same job to two workers](relay-queue-races.md). The text below describes the code at `46390a3`.
+
 Both transactions act on members read in an earlier round trip, and neither checks that the score is still the same. With several worker processes on one Redis it shows up twice.
 
 In `reserve`, worker B reads a due member. Before B's transaction for it runs, worker A claims the same job, fails an attempt, schedules a retry 2 s ahead and acks. B's `ZREM` then removes the future-dated retry and returns 1, so B runs the attempt now instead of after the backoff. Had A delivered, B's `ZADD` still runs and parks the finished job in `inflight` for 120 s, after which the final-status check acks it.
