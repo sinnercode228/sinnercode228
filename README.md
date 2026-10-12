@@ -55,6 +55,7 @@ Smaller demos are in [portfolio](https://github.com/sinnercode228/portfolio): a 
 
 Write-ups on how specific parts of these projects work. Each one quotes the code, links to the lines at a pinned commit, then says what the tests cover and where the code is still thin. Index: [notes/](notes/).
 
+- [The late ack was the small bug: fencing a Redis queue with the lease deadline](notes/relay-lease-fencing.md): part 2, where the fencing token turns up a worse bug
 - [My Redis queue claimed jobs atomically and still handed the same job to two workers](notes/relay-queue-races.md): two races, a test that forces them on every run, and the fix
 - [Relay's delivery queue on two Redis sorted sets with a 120-second lease](notes/relay-redis-lease-queue.md)
 - [How FlowDesk rotates refresh tokens with a conditional UPDATE and a cross-tab lock](notes/flowdesk-refresh-rotation.md)
@@ -88,6 +89,7 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 
 Разборы того, как устроены отдельные части проектов, с кодом и ссылками на строки:
 
+- [Поздний ack оказался мелочью: fencing token из срока аренды в очереди на Redis](notes/relay-lease-fencing.ru.md): вторая часть, где fencing token вскрывает ошибку посерьёзнее
 - [Очередь на Redis атомарно забирала задачи и всё равно отдавала одну и ту же двум воркерам](notes/relay-queue-races.ru.md): две гонки, тест, который ловит их при каждом запуске, и исправление
 - [Очередь доставок Relay на двух sorted set в Redis с арендой задачи на 120 секунд](notes/relay-redis-lease-queue.ru.md)
 - [Ротация refresh-токенов в FlowDesk через условный UPDATE и блокировку между вкладками](notes/flowdesk-refresh-rotation.ru.md)

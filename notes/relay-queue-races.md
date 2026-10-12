@@ -219,6 +219,8 @@ In practice the Compose file runs one `relay worker` process. One process cannot
 
 ## Still open: a late ack
 
+Update: fixed in [`8c6ccb4`](https://github.com/sinnercode228/integration-hub/commit/8c6ccb42a436863df19aadec3e896cd45b4cf98f), which made the lease deadline a fencing token for every write after an attempt. Doing that turned up a bigger bug than the late ack: [The late ack was the small bug: fencing a Redis queue with the lease deadline](relay-lease-fencing.md). The text below describes the code at `b0ae35c`.
+
 `ack` is still a plain `ZREM` on `inflight`, and it does not check whose lease it removes. The lease is 120 seconds by default. The attempt timeout is set per destination: 20 seconds with default settings, but `timeout_seconds` in the config only has to be positive, so a destination can get more than 120. Then this sequence works:
 
 1. Worker x's attempt outlives its lease.

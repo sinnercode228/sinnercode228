@@ -2,6 +2,8 @@
 
 Write-ups on how specific parts of my public projects work. Each one quotes the code it describes and links to the exact lines at a fixed commit, then lists what the tests cover and where the code is still thin.
 
+- [The late ack was the small bug: fencing a Redis queue with the lease deadline](relay-lease-fencing.md)\
+  Part 2 of the Relay queue story. Making the lease deadline a fencing token showed that a worker past its lease overwrote the new owner's delivery record; every write after an attempt now checks the token, and a test pins the one place where I first got it wrong.
 - [My Redis queue claimed jobs atomically and still handed the same job to two workers](relay-queue-races.md)\
   Two races in Relay's queue: `MULTI` made the claim atomic but not the read it was based on. A test hook that forces both interleavings on every run, the Lua fix, and a third gap still pinned with a strict xfail.
 - [Relay's delivery queue on two Redis sorted sets with a 120-second lease](relay-redis-lease-queue.md)\
@@ -19,6 +21,7 @@ Write-ups on how specific parts of my public projects work. Each one quotes the 
 
 Разборы того, как устроены отдельные части моих открытых проектов. В каждом я цитирую код со ссылками на строки в конкретном коммите, а в конце пишу, что покрывают тесты и где код пока слабый.
 
+- [Поздний ack оказался мелочью: fencing token из срока аренды в очереди на Redis](relay-lease-fencing.ru.md)
 - [Очередь на Redis атомарно забирала задачи и всё равно отдавала одну и ту же двум воркерам](relay-queue-races.ru.md)
 - [Очередь доставок Relay на двух sorted set в Redis с арендой задачи на 120 секунд](relay-redis-lease-queue.ru.md)
 - [Ротация refresh-токенов в FlowDesk через условный UPDATE и блокировку между вкладками](flowdesk-refresh-rotation.ru.md)
