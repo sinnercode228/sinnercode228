@@ -140,6 +140,8 @@ Two things are not tested. The server tests send refreshes one after another, so
 
 ## Where it can still break
 
+Update: [`af961e9`](https://github.com/sinnercode228/flowdesk-crm/commit/af961e9336ece99694ac0c72c1d998f90d0aa188) makes both reuse branches revoke the family and adds a test with two refreshes at once; login now deletes token families whose newest token has expired. [`4770f75`](https://github.com/sinnercode228/flowdesk-crm/commit/4770f75891eb6648a4edc7d01a99ae70e1668454) makes `trustProxy` opt-in and refuses weak JWT secrets in production. The text below describes the code at `de0a2c2`.
+
 - Without `navigator.locks`, which browsers expose only in secure contexts (HTTPS or localhost), 401s that arrive together still race. Both tabs send R1, the loser's `rotate` returns `false`, and `request()` calls `session.set(null)` on the shared key. If that lands after the winner has stored R2, the `storage` event logs the winning tab out too.
 - Any non-200 answer to the refresh clears the session, including status 0, which `createHttpTransport` returns on a network error ([`transport.ts#L43-L47`](https://github.com/sinnercode228/flowdesk-crm/blob/de0a2c21755f9f59060d9d6d07f55e0b3b1cd42b/web/src/lib/api/transport.ts#L43-L47)). The fetch has no timeout or `AbortSignal` either, so a stalled refresh keeps the lock and the other tabs wait behind it.
 - Which reuse branch a duplicate hits depends on timing, and no comment in the code says the difference is intended.

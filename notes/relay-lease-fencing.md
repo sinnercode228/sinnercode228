@@ -181,6 +181,8 @@ The check is in [`cli.py#L61-L72`](https://github.com/sinnercode228/integration-
 
 ## What the fence does not stop
 
+Update: the heartbeat is in [`c4be59c`](https://github.com/sinnercode228/integration-hub/commit/c4be59c91e59dc628734edbcdb2e5ec0c2d9f737). While the connector runs, the worker renews the lease every `lease_seconds / 3`; a renewal that finds the lease lost cancels the request, and a renewal whose reply was lost no longer looks like a takeover on the next tick. The text below describes the code at `8c6ccb4`.
+
 An attempt that outlives its lease can still be sent twice. The worker renews the lease before the request and before the write, not during the request. If the destination takes longer than the lease, another worker can take the job over and send it again. The token stops the first worker from corrupting the record or moving the job, but its request has already gone out. Only the outbound webhook connector sends an `Idempotency-Key` header ([`webhook.py#L55`](https://github.com/sinnercode228/integration-hub/blob/8c6ccb42a436863df19aadec3e896cd45b4cf98f/backend/src/relay/connectors/outbound/webhook.py#L55)), so Telegram, SMTP, Google Sheets and amoCRM can get a second message, row or lead.
 
 The stale worker's attempt is logged as `worker.lease_lost` and counted in `relay_delivery_attempts_total` with `outcome="lease_lost"`. It is not stored in the delivery's history, because writing it there would mean writing to a record the worker no longer owns.

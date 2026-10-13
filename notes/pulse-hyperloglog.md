@@ -178,6 +178,8 @@ Not covered: `SaltStore` and `visitorId` have no direct test, and no test sits o
 
 ## Trade-offs and gaps
 
+Update: [`5239238`](https://github.com/sinnercode228/pulse-analytics/commit/5239238777535dbebbe697f76cea3e3c538ffdd9) corrects the `SaltStore` comment and adds the missing tests: salt retention across days and restarts, and the switch from exact to dense at 512/513 hashes. The text below describes the code at `96645e1`.
+
 - A new salt every UTC day means a new id every day, so "Unique visitors" over a week is closer to visitor-days than to people. A visitor active on both sides of midnight UTC counts twice in any range that spans it; for a site outside UTC that includes a single local day.
 - Today's and yesterday's salts are in the same file as the sketches. For those two days, anyone holding the file can test a guessed IP and User-Agent against a sparse sketch. After the salt is deleted, that takes 16 unknown random bytes.
 - `TRUST_PROXY` is on by default ([`config.ts#L28`](https://github.com/sinnercode228/pulse-analytics/blob/96645e153317f7bc35e5fc17bf4f76424d83c7c3/server/src/config.ts#L28)). Without a proxy that overwrites `X-Forwarded-For`, a client can claim a new IP, and so a new visitor id, per request.
