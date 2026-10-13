@@ -2,9 +2,9 @@
 
 [English](slotbook-exclusion-constraint.md) · **Русский**
 
-Репозиторий: [sinnercode228/slotbook](https://github.com/sinnercode228/slotbook) · Демо: [sinnercode228.github.io/slotbook](https://sinnercode228.github.io/slotbook/) · Ссылки на код ведут на коммит [`1c83184`](https://github.com/sinnercode228/slotbook/tree/1c8318474319f6e61cc76a3bbc5b5911625d7c1e)
+Репозиторий: [sinnercode228/slotbook](https://github.com/sinnercode228/slotbook) · Демо: [sinnercode228.github.io/slotbook](https://sinnercode228.github.io/slotbook/) · Ссылки на код ведут на коммит [`1c83184`](https://github.com/sinnercode228/slotbook/tree/1c8318474319f6e61cc76a3bbc5b5911625d7c1e) (до исправления) и [`939022a`](https://github.com/sinnercode228/slotbook/tree/939022ae1a3c00362d064e0a11dee60eb2d4958d) (исправление)
 
-Два клиента выбирают одного мастера и нажимают одно и то же время, и оба запроса приходят в `POST /v1/holds` с разницей в миллисекунду. Slotbook не ищет пересечения на Go перед тем, как вставить удержание. Он вставляет строку, а решает exclusion constraint в PostgreSQL: первая транзакция коммитится, вторая падает с SQLSTATE `23P01`, и второй клиент получает `409 slot_taken`. Ниже — само ограничение, чего ждёт вторая транзакция, почему перенос сначала отменяет и только потом вставляет, и один порядок событий, при котором проигравший получает `500` вместо `409`.
+Два клиента выбирают одного мастера и нажимают одно и то же время, и оба запроса приходят в `POST /v1/holds` с разницей в миллисекунду. Slotbook не ищет пересечения на Go перед тем, как вставить удержание. Он вставляет строку, а решает exclusion constraint в PostgreSQL: первая транзакция коммитится, вторая падает с SQLSTATE `23P01`, и второй клиент получает `409 slot_taken`. Ниже — само ограничение, чего ждёт вторая транзакция, почему перенос сначала отменяет и только потом вставляет, и один порядок событий, при котором проигравший получал `500` вместо `409`, вместе с повтором транзакции, который это исправил.
 
 Slotbook — демо-проект: сеть салонов, мастера и клиенты выдуманы. Код, тесты и замеры ниже настоящие.
 
@@ -174,7 +174,7 @@ func expireStaleHolds(ctx context.Context, q db.Querier, staffID int64, start, e
 
 Без `staff_id` `Hold` собирает всех мастеров, у которых по расписанию есть это начало, и сортирует их: сначала те, у кого меньше подтверждённых записей в этот местный день, затем по id ([`orderByLoad`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/hold.go#L93-L122)). Потом по очереди вызывает `insertHold` для каждого, каждый раз в отдельной транзакции, и при `ErrSlotTaken` переходит к следующему ([`hold.go#L69-L90`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/hold.go#L69-L90)). `slot_taken` запрос получает, только если заняты все кандидаты. Подсчёт идёт вне транзакций вставки, так что два параллельных запроса могут начать с одного и того же мастера; спор решает ограничение, и проигравший идёт дальше по списку. [`TestAnyStaffFallsThroughToTheNextFreeStaffMember`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/hold_test.go#L168-L183) даёт Lena, первой в очереди, удержание на 10:00 и ждёт, что удержание «любого мастера» на 10:00 достанется Jonas, а третий такой запрос получит `ErrSlotTaken`.
 
-## Когда проигравший получает 500
+## Когда проигравший получал 500
 
 Тот же комментарий в `execIndexing.c` продолжается так ([`#L39-L45`](https://github.com/postgres/postgres/blob/REL_16_13/src/backend/executor/execIndexing.c#L39-L45)):
 
@@ -194,7 +194,7 @@ sequenceDiagram
     Note over A: повторный скан, элемент B мёртв, вставка A проходит
 ```
 
-Это другое сообщение — `deadlock detected`, SQLSTATE `40P01`. `IsExclusionViolation` знает только `23P01`, поэтому `insertHold` оборачивает дедлок как обычную ошибку, и API отвечает `500 internal`. Если мастер любой, цикл на этом останавливается и к следующему кандидату не переходит.
+Это другое сообщение — `deadlock detected`, SQLSTATE `40P01`. На `1c83184` `IsExclusionViolation` знала только `23P01`, поэтому `insertHold` оборачивал дедлок как обычную ошибку, и API отвечал `500 internal`. Если мастер любой, цикл на этом останавливался и к следующему кандидату не переходил.
 
 Я измерил это во второй временной копии тестом, который крутит в цикле неизменённый `Hold`: две горутины на один слот за раунд, один пул на все раунды, таблица очищается между раундами. Каждый раунд кончился ровно одним удержанием. В трёх циклах по 2000, 1000 и 1000 раундов 18, 60 и 10 проигравших получили вместо `ErrSlotTaken` ошибку `booking: insert hold: ERROR: deadlock detected (SQLSTATE 40P01)` (цикл с 60 очищал таблицу через `TRUNCATE`, два других через `DELETE`). Каждая такая ошибка пришла чуть позже чем через секунду после вызова, самое позднее через 1,005 с. В логе сервера виден цикл: два `INSERT` из `insertHold`, и каждый ждёт транзакцию другого:
 
@@ -206,23 +206,162 @@ DETAIL:  Process 15104 waits for ShareLock on transaction 177625; blocked by pro
 
 С 20 горутинами на раунд её получили 336 из 1900 проигравших за 100 раундов, и ошибки выстроились в очередь: самая поздняя пришла через 18,02 с.
 
-Гарантия держится: ни один раунд не кончился двумя удержаниями. Но проигравший может получить `500` вместо `409`, да ещё на секунду и больше позже. Исправление — повторять транзакцию при `40P01`, ограниченное число раз. Когда цикл ожидания разорван, повтор ждёт выжившую транзакцию, как любой другой проигравший, и получает `23P01` или вставляет строку, если та откатилась. `CreateBlock` и `Reschedule` тоже проверяют только `23P01`, и ни одна из трёх функций на `1c83184` транзакцию не повторяет.
+Гарантия держалась: ни один раунд не кончился двумя удержаниями. Но проигравший мог получить `500` вместо `409`, да ещё на секунду и больше позже. `CreateBlock` и `Reschedule` тоже проверяли только `23P01`, и ни одна из трёх функций транзакцию не повторяла.
+
+Исправление — два коммита: [`54ccd48`](https://github.com/sinnercode228/slotbook/commit/54ccd486199c9392846f2730a82e3a3e73a830b4) для удержаний, блокировок и переносов и [`939022a`](https://github.com/sinnercode228/slotbook/commit/939022ae1a3c00362d064e0a11dee60eb2d4958d) для подтверждений, которые я сначала упустил. `db.IsDeadlock` распознаёт `40P01` так же, как `IsExclusionViolation` распознаёт `23P01` ([`db.go#L51-L54`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/db/db.go#L51-L54)), а новая вспомогательная функция при такой ошибке запускает транзакцию заново:
+
+```go
+// inTx runs fn in a transaction like pgx.BeginFunc and, when PostgreSQL
+// aborts the transaction as a deadlock victim (40P01), runs fn again from the
+// start in a new one, up to txAttempts times in all. When ctx is done it
+// stops retrying and returns the last error.
+//
+// Two writes that add overlapping periods to the exclusion constraint's index
+// at the same moment (inserts, or the update that confirms a hold) can each
+// wait for the other's entry, and the deadlock detector aborts one of them
+// instead of letting it fail with 23P01. With more such writes it aborts one
+// per deadlock_timeout until one is left. A victim that came straight back
+// with a new entry would join that chain again, so a retry starts by taking
+// an advisory lock and retries go one at a time.
+func inTx(ctx context.Context, b beginner, fn func(pgx.Tx) error) error {
+	for attempt := 1; ; attempt++ {
+		err := pgx.BeginFunc(ctx, b, func(tx pgx.Tx) error {
+			if attempt > 1 {
+				if _, err := tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtext('slotbook-deadlock-retry'))`); err != nil {
+					return err
+				}
+			}
+			return fn(tx)
+		})
+		if attempt == txAttempts || !db.IsDeadlock(err) {
+			return err
+		}
+		base := time.Millisecond << attempt
+		pause := time.NewTimer(base + rand.N(base))
+		select {
+		case <-ctx.Done():
+			pause.Stop()
+			return err
+		case <-pause.C:
+		}
+	}
+}
+```
+
+[`tx.go#L20-L54`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/tx.go#L20-L54)
+
+Перед повтором она ждёт случайное время: 2–4 мс, потом 4–8, 8–16 и 16–32 мс, за пять попыток не больше 60 мс. Повторяется только `40P01`: `23P01` и любая другая ошибка возвращаются после первой попытки, как раньше. `insertHold`, `CreateBlock`, `Reschedule` и `Confirm` вызывают `inTx(ctx, m.pool, ...)` там, где вызывали `pgx.BeginFunc`, с тем же замыканием ([`admin.go#L46`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/admin.go#L46), [`manage.go#L126`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/manage.go#L126), [`confirm.go#L58`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/confirm.go#L58)). Для удержания:
+
+```go
+func (m *Manager) insertHold(ctx context.Context, h newHold) (Booking, error) {
+	var b Booking
+	err := inTx(ctx, m.pool, func(tx pgx.Tx) error {
+		if err := expireStaleHolds(ctx, tx, h.staffID, h.start, h.busyUntil, h.now); err != nil {
+			return err
+		}
+		var err error
+		b, err = scanBooking(tx.QueryRow(ctx, `
+			INSERT INTO bookings (kind, status, location_id, staff_id, service_id, starts_at, ends_at, busy_until, period,
+			                      price_minor, currency, hold_token_hash, hold_expires_at, created_at)
+			VALUES ('appointment', 'held', $1, $2, $3, $4, $5, $6, tstzrange($4, $6, '[)'), $7, $8, $9, $10, $11)
+			RETURNING `+bookingColumns,
+			h.locationID, h.staffID, h.service.ID, h.start, h.end, h.busyUntil,
+			h.service.PriceMinor, h.service.Currency, h.tokenHash, h.expiresAt, h.now))
+		return err
+	})
+	if db.IsExclusionViolation(err) {
+		return Booking{}, ErrSlotTaken
+	}
+	if err != nil {
+		return Booking{}, fmt.Errorf("booking: insert hold: %w", err)
+	}
+	return b, nil
+}
+```
+
+[`hold.go#L133-L156`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/hold.go#L133-L156)
+
+Замыкание — это вся транзакция, поэтому повтор проходит её целиком: истечение просроченных удержаний и вставку, а в переносе ещё блокировку строки, отмену и напоминания. Обработка ошибки после него не изменилась: `23P01` — это `ErrSlotTaken`, а `40P01`, оставшаяся после пятой попытки, оборачивается как раньше.
+
+Простого повтора не хватило. Когда три вставки и больше приходят в один момент, их проверочные сканы ждут друг друга, и PostgreSQL обрывает по одной жертве за `deadlock_timeout`, пока не останется одна вставка. Жертва, которая сразу повторяет транзакцию, кладёт в индекс новый элемент и снова встаёт в эту цепочку. С простым повтором и короткой паузой у восьми горутин 34 вызова всё равно упали с `40P01` после пяти попыток, а в сценарии с 20 горутинами, описанном ниже в разделе о тестах, единственный прогон, попавший в цепочку, прошёл 94 цикла дедлоков, и все 19 проигравших закончили с `40P01`. Поэтому повтор первым делом берёт advisory lock: повторы идут по одному и не могут поддерживать цепочку. Первая попытка блокировку не берёт, так что запрос, не попавший в дедлок, выполняется как раньше, и пересечение по-прежнему запрещает ограничение. Ключ этой блокировки один на всю базу, поэтому повторы для разных мастеров тоже ждут друг друга. За 300 раундов на каждый размер вызовам понадобилось столько попыток:
+
+```
+горутин в раунде   1 попытка   2 попытки   3 попытки   4 попытки
+               4        1095          96           9           0
+               8        2041         348          10           1
+              16        4017         758          24           1
+```
+
+Пятая попытка не понадобилась ни одному вызову, и ни один не упал.
+
+В первом коммите я упустил подтверждение. Подтверждение удержания — один `UPDATE` из `held` в `confirmed` ([`confirm.go#L78-L84`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/confirm.go#L78-L84)). `status` входит в `WHERE` ограничения, поэтому PostgreSQL не может сделать это обновление HOT: новая версия строки получает свой элемент в `bookings_no_overlap`, и проверка идёт та же, что при вставке. Удержание или блокировка, вставленные на тот же период в тот же момент, могут ждать подтверждение, пока подтверждение ждёт их. Когда PostgreSQL обрывал подтверждение, клиент, чьё это было удержание, получал `500`, вставка повторялась и получала `409`, и ни один из двух запросов не проходил. На `54ccd48` подтверждение получило `40P01` в 43 раундах из 400 против трёх блокировок, в 13 из 400 против трёх удержаний и в 19–25 из 400 против смеси удержаний и блокировок. `939022a` тоже пускает `Confirm` через `inTx`. Ключ идемпотентности резервируется, а новый токен управления создаётся внутри замыкания, поэтому строка ключа из оборванной попытки откатывается вместе с ней, а клиент получает тот токен, чей хеш закоммичен.
+
+Цепочку повтор не укорачивает. При k одновременных конфликтующих операциях PostgreSQL всё так же нужно около (k − 1) × `deadlock_timeout`, чтобы их разобрать, так что проигравший теперь получает `409`, но может получить его поздно: в сценарии с 20 горутинами при `deadlock_timeout` по умолчанию, 1 с, два прогона, попавшие в цепочку, заняли 19,0 с и 20,0 с.
+
+`54ccd48` добавляет три интеграционных теста, которые сталкивают одновременные операции на одном периоде, много раундов на одном пуле, а `939022a` — четвёртый:
+
+- [`TestSimultaneousHoldsNeverFailWithADeadlock`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/hold_test.go#L123-L142): 150 раундов по четыре удержания.
+- [`TestSimultaneousBlocksAndHoldsNeverFailWithADeadlock`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/admin_test.go#L47-L68): 200 раундов по две блокировки и два удержания.
+- [`TestSimultaneousReschedulesNeverFailWithADeadlock`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/manage_test.go#L155-L198): 100 раундов по четыре переноса на один период. Победитель после каждого раунда возвращается на место, а каждый проигравший должен остаться `confirmed`.
+- [`TestSimultaneousConfirmsAndInsertsNeverFailWithADeadlock`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/confirm_test.go#L205-L248): 160 раундов, в каждом одно подтверждение против двух удержаний и блокировки. Подтверждение стартует с задержкой от 0 до 975 мкс, шагами по 25 мкс, которые повторяются каждые 40 раундов, чтобы его `UPDATE` встретился со вставками.
+
+Каждый раунд должен закончиться одним успехом, `ErrSlotTaken` у всех остальных и одной активной строкой на периоде ([`checkOneWinner`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/fixture_test.go#L115-L143)). Фикстура для гонок даёт каждой горутине своё соединение и ставит `deadlock_timeout` в 10 мс на каждом соединении ([`fixture_test.go#L86-L92`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/fixture_test.go#L86-L92)), так что дедлок стоит миллисекунды, а не секунду. Если роль в базе не может менять эту настройку, четыре этих теста пропускаются. Тест на удержания:
+
+```go
+// Two transactions that insert the same period at the same moment can each
+// find the other's uncommitted entry in the constraint's index and wait for
+// it; PostgreSQL's deadlock detector then aborts one of them with 40P01. The
+// loser must still get ErrSlotTaken. A round deadlocks only now and then, and
+// hardly ever while the index fits in one page (about the first 40 rounds
+// here), so the test runs many rounds on one pool.
+func TestSimultaneousHoldsNeverFailWithADeadlock(t *testing.T) {
+	const rounds, n = 150, 4
+	f := newRaceFixture(t, n)
+	ctx := context.Background()
+	start := at(2026, time.October, 14, 10, 0)
+	for round := range rounds {
+		errs := race(n, func(int) error {
+			_, err := f.manager.Hold(ctx, booking.HoldRequest{ServiceID: f.haircut(), StaffID: f.lena(), Start: start})
+			return err
+		})
+		f.checkOneWinner(t, round, errs, start, start.Add(time.Hour))
+		f.clearBookings(t)
+	}
+}
+```
+
+[`hold_test.go#L123-L142`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/hold_test.go#L123-L142)
+
+Первые три я запустил на старом коде, то есть на коммите перед исправлением, к которому добавлены только новые тесты и их вспомогательные функции, по 20 раз с `-race` и 20 раз без. Упали все 120 прогонов, каждый на `40P01` там, где ожидался `ErrSlotTaken`. Первым падал раунд с номером от 10 до 77 у удержаний, от 1 до 66 у блокировок и от 2 до 39 у переносов:
+
+```
+hold_test.go:139: round 39: got booking: insert hold: ERROR: deadlock detected (SQLSTATE 40P01), want ErrSlotTaken
+admin_test.go:65: round 39: got booking: insert hold: ERROR: deadlock detected (SQLSTATE 40P01), want ErrSlotTaken
+manage_test.go:183: round 30: got ERROR: deadlock detected (SQLSTATE 40P01), want ErrSlotTaken
+```
+
+На коде без изменения в `Confirm` тест на подтверждения упал во всех 30 прогонах, 15 с `-race` и 15 без, и ещё в 20 из 20 с прежним шагом в 50 мкс. Каждый раз это было `round N: confirm: ERROR: deadlock detected (SQLSTATE 40P01)`, а первым по этим 50 прогонам падал раунд с номером от 2 до 103. На `939022a` я запустил каждый из четырёх тестов 30 раз с `-race` и 30 раз без, вместе с `TestConcurrentHoldsOnTheSameSlotHaveOneWinner`: 300 прогонов, ни одного падения, самый долгий занял 3,38 с с `-race`.
+
+Четыре юнит-теста гоняют `inTx` с поддельным `pgx.Tx` и подставленной ошибкой `40P01` ([`tx_test.go#L80-L150`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/tx_test.go#L80-L150)). Функция проходит после четырёх дедлоков, начав пять транзакций и закоммитив одну, и берёт advisory lock только со второй попытки, до замыкания. Она сдаётся после пятой попытки с `40P01`, не повторяет `23P01` и доменную ошибку и останавливается после одного вызова, если контекст отменён.
 
 ## Что покрывают тесты
 
 [`TestConcurrentHoldsOnTheSameSlotHaveOneWinner`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/hold_test.go#L76-L121) запускает 20 горутин, которые ждут на одном канале, закрывает его, и все они вызывают `Hold` для Lena на 10:00. Тест ждёт ровно один успех, 19 `ErrSlotTaken` и ни одной другой ошибки, а потом считает строки `held` в таблице и ждёт одну. Фикстура просит пул на 25 соединений; по умолчанию у тестового пула их 8 ([`dbtest.go#L37`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/dbtest/dbtest.go#L37)), и с восемью большинство горутин стояло бы в очереди за соединением, а не встречалось в базе.
 
-Дедлок этот тест не поймал: 200 прогонов из 200 прошли с `-race` и 200 из 200 без него. Каждый прогон начинается со свежего пула. Когда я запустил то же тело после одного раунда гонки без проверок на том же пуле, оно упало 3 раза из 180 без `-race` и прошло все 180 прогонов с ним. В каждом упавшем прогоне все 19 проигравших получили `40P01`, а сами прогоны заняли 16,20 с, 19,20 с и 19,22 с. Почему в первом раунде на свежем пуле дедлок не проявился, я пока не выяснил.
+На старом коде этот тест дедлок так и не поймал: 200 прогонов из 200 прошли с `-race` и 200 из 200 без него. Каждый прогон начинается со свежего пула. Когда я запустил то же тело после одного раунда гонки без проверок на том же пуле, оно упало 3 раза из 180 без `-race` и прошло все 180 прогонов с ним. В каждом упавшем прогоне все 19 проигравших получили `40P01`, а сами прогоны заняли 16,20 с, 19,20 с и 19,22 с. С `deadlock_timeout` в 100 мс то же тело после разогревочного раунда упало 4 раза из 300, и каждый раз все 19 проигравших получили `40P01`. На `54ccd48` оно не упало ни в одном из 300 прогонов при 100 мс, ни в одном из 250 при 1 с по умолчанию и ни в одном из 100 с `-race`. Два прогона при 1 с попали в цепочку и заняли 19,0 с и 20,0 с, и ни одному вызову не понадобилось больше трёх попыток.
 
-Рядом с ним: тесты ограничения в `db_test.go` (пересечение, соседние периоды, неактивные строки, CHECK на период), `TestOverlappingHoldIsSlotTaken` с буфером (10:45 упирается в стрижку на 10:00, 11:00 проходит), [`TestBlocksShareTheOverlapGuarantee`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/admin_test.go#L13-L45), тесты на истечение, «любого мастера» и перенос, о которых шла речь выше, и HTTP-тест, который ждёт `409 slot_taken` от `POST /v1/holds`. Каждый интеграционный тест получает свою свежую схему с миграциями. На пустой базе, с PostgreSQL 16.13 и Go 1.24.7, `go test -race -count=1 ./...` прошёл 107 тестовых функций и 92 подтеста.
+Пока я писал исправление, нашлась часть ответа на вопрос, почему на свежем пуле дедлок не проявлялся. Временный тест записывал размер индекса `bookings_no_overlap` в каждом раунде с четырьмя одновременными удержаниями. Индекс вырос с одной страницы до трёх на 39-м раунде, и сразу после этого дедлоки стали частыми, примерно в 20% раундов; пока индекс помещался в одну страницу, они были редкими. Редкими, но не невозможными: на `54ccd48` один прогон `TestConcurrentHoldsOnTheSameSlotHaveOneWinner` попал в полную цепочку на свежем пуле, занял 17,21 с и прошёл. Поэтому тесты на гонку выше крутят много раундов на одном пуле.
+
+Рядом с ним: тесты ограничения в `db_test.go` (пересечение, соседние периоды, неактивные строки, CHECK на период), `TestOverlappingHoldIsSlotTaken` с буфером (10:45 упирается в стрижку на 10:00, 11:00 проходит), [`TestBlocksShareTheOverlapGuarantee`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/admin_test.go#L13-L45), тесты на истечение, «любого мастера» и перенос, о которых шла речь выше, HTTP-тест, который ждёт `409 slot_taken` от `POST /v1/holds`, а также четыре теста на гонку и четыре юнит-теста `inTx` из исправления. Каждый интеграционный тест получает свою свежую схему с миграциями. На пустой базе, с PostgreSQL 16.13 и Go 1.24.7, `go test -race -count=1 ./...` на `939022a` прошёл 115 тестовых функций и 92 подтеста, а на `1c83184` — 107 и 92.
 
 ## Известные слабые места
 
-- Случай с `40P01` выше: проигравший при одновременной вставке может получить `500` через секунду и больше вместо `409`.
-- Из путей, которые пишут занятое время, под гонкой в тестах проверяются только удержания. Блокировки времени и переносы идут через то же ограничение, но их тесты шлют по одному запросу.
+- Переносы в тестах соревнуются только друг с другом. Удержание, отпущенное в тот же момент, почти всегда коммитится раньше, чем перенос доходит до вставки, потому что перенос сначала делает больше обращений к базе (около 2,9 мс против 1,7 мс у удержания), и один или три переноса против удержаний попадали в дедлок не больше чем в 1 раунде из 300. Такая смесь идёт через тот же `inTx`, но тестом она не покрыта.
 - `POST /v1/holds` не требует входа и не ограничен по частоте. Скрипт может держать занятыми все слоты салона, по десять минут за раз, и ограничение защищает такие удержания так же, как настоящие.
 - Освободить удержание нельзя. Маршруты записи — `POST /v1/holds`, `POST /v1/bookings`, а также `GET`, `cancel` и `reschedule` для записи ([`server.go#L61-L65`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/httpapi/server.go#L61-L65)). Клиент, который вернулся назад и выбрал другое время, оставляет первое занятым до истечения.
 - Истечение удержания сравнивает `hold_expires_at` с часами процесса API, `m.clock.Now()`, а не с `now()` базы. Два процесса API с расходящимися часами на столько же разойдутся в том, когда удержание истекло.
 - В демо на GitHub Pages PostgreSQL нет. Там работает копия этих правил на TypeScript поверх IndexedDB, и гонку двух вкладок решает то, что IndexedDB выполняет `readwrite`-транзакции по одной, а не это ограничение.
+
+Исправление: [`54ccd48` Stop answering 500 when simultaneous inserts of one period deadlock](https://github.com/sinnercode228/slotbook/commit/54ccd486199c9392846f2730a82e3a3e73a830b4), [`939022a` Stop answering 500 when a confirm deadlocks with a simultaneous insert on its period](https://github.com/sinnercode228/slotbook/commit/939022ae1a3c00362d064e0a11dee60eb2d4958d) · Тесты: [`hold_test.go#L123-L142`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/hold_test.go#L123-L142), [`confirm_test.go#L205-L248`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/confirm_test.go#L205-L248), [`tx_test.go`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/tx_test.go)
 
 Код: [github.com/sinnercode228/slotbook](https://github.com/sinnercode228/slotbook)

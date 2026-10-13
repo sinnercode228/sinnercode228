@@ -2,9 +2,9 @@
 
 **English** · [Русский](slotbook-exclusion-constraint.ru.md)
 
-Repository: [sinnercode228/slotbook](https://github.com/sinnercode228/slotbook) · Demo: [sinnercode228.github.io/slotbook](https://sinnercode228.github.io/slotbook/) · Code links point to commit [`1c83184`](https://github.com/sinnercode228/slotbook/tree/1c8318474319f6e61cc76a3bbc5b5911625d7c1e)
+Repository: [sinnercode228/slotbook](https://github.com/sinnercode228/slotbook) · Demo: [sinnercode228.github.io/slotbook](https://sinnercode228.github.io/slotbook/) · Code links point to commit [`1c83184`](https://github.com/sinnercode228/slotbook/tree/1c8318474319f6e61cc76a3bbc5b5911625d7c1e) (before the fix) and [`939022a`](https://github.com/sinnercode228/slotbook/tree/939022ae1a3c00362d064e0a11dee60eb2d4958d) (the fix)
 
-Two customers pick the same specialist and click the same time, and both requests reach `POST /v1/holds` within a millisecond. Slotbook does not search for an overlap in Go before inserting the hold. It inserts, and an exclusion constraint in PostgreSQL decides: the first transaction commits, the second fails with SQLSTATE `23P01`, and that customer gets `409 slot_taken`. This note covers the constraint, what the second transaction waits for, why a reschedule cancels before it inserts, and one interleaving where the loser gets a `500` instead.
+Two customers pick the same specialist and click the same time, and both requests reach `POST /v1/holds` within a millisecond. Slotbook does not search for an overlap in Go before inserting the hold. It inserts, and an exclusion constraint in PostgreSQL decides: the first transaction commits, the second fails with SQLSTATE `23P01`, and that customer gets `409 slot_taken`. This note covers the constraint, what the second transaction waits for, why a reschedule cancels before it inserts, and one interleaving where the loser got a `500` instead, with the retry that fixed it.
 
 Slotbook is a demo: the salon chain, its staff and its customers are made up. The code, the tests and the measurements below are real.
 
@@ -174,7 +174,7 @@ So a non-deferrable exclusion constraint is checked for each row as that row is 
 
 Without `staff_id`, `Hold` collects every specialist whose schedule offers the start and sorts them: fewest confirmed appointments that local day first, then lowest id ([`orderByLoad`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/hold.go#L93-L122)). Then it calls `insertHold` for each in turn, one transaction each, and moves on when one returns `ErrSlotTaken` ([`hold.go#L69-L90`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/hold.go#L69-L90)). The request gets `slot_taken` only when every candidate is taken. The count runs outside the insert transactions, so two concurrent requests can both start with the same person; the constraint settles it, and the loser goes on to the next one. [`TestAnyStaffFallsThroughToTheNextFreeStaffMember`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/hold_test.go#L168-L183) gives Lena, first in line, a hold at 10:00, expects an any-staff hold for 10:00 to land on Jonas, and a third request to get `ErrSlotTaken`.
 
-## When the loser gets a 500
+## When the loser got a 500
 
 The same comment in `execIndexing.c` goes on ([`#L39-L45`](https://github.com/postgres/postgres/blob/REL_16_13/src/backend/executor/execIndexing.c#L39-L45)):
 
@@ -194,7 +194,7 @@ sequenceDiagram
     Note over A: scan again, B's entry is dead, A's insert goes through
 ```
 
-The different message is `deadlock detected`, SQLSTATE `40P01`. `IsExclusionViolation` only knows `23P01`, so `insertHold` wraps it as an ordinary error and the API answers `500 internal`. With any staff, the loop stops instead of trying the next person.
+The different message is `deadlock detected`, SQLSTATE `40P01`. At `1c83184`, `IsExclusionViolation` only knew `23P01`, so `insertHold` wrapped the deadlock as an ordinary error and the API answered `500 internal`. With any staff, the loop stopped instead of trying the next person.
 
 I measured it in a second scratch worktree, with a test that loops around the unmodified `Hold`: two goroutines on one slot per round, the same pool from round to round, the table emptied between rounds. Every round ended with exactly one hold. In three loops of 2000, 1000 and 1000 rounds, 18, 60 and 10 losers got `booking: insert hold: ERROR: deadlock detected (SQLSTATE 40P01)` instead of `ErrSlotTaken` (the loop with 60 emptied the table with `TRUNCATE`, the other two with `DELETE`). Each of those errors came a little over one second after the call, at most 1.005 s. The server log shows the cycle, two `INSERT`s from `insertHold` each waiting for the other's transaction:
 
@@ -206,23 +206,162 @@ DETAIL:  Process 15104 waits for ShareLock on transaction 177625; blocked by pro
 
 With 20 goroutines per round, 336 of the 1900 losers in 100 rounds got it, and the errors queued up: the slowest came after 18.02 s.
 
-The guarantee holds: no round ended with two holds. But a loser can get `500` instead of `409`, a second or more late. The fix is to retry the transaction on `40P01`, a bounded number of times. Once the cycle is broken, the retry waits for the survivor like any other loser and gets `23P01`, or inserts if the survivor rolled back. `CreateBlock` and `Reschedule` also check for `23P01` only, and none of the three retries at `1c83184`.
+The guarantee held: no round ended with two holds. But a loser could get `500` instead of `409`, a second or more late. `CreateBlock` and `Reschedule` also checked for `23P01` only, and none of the three retried.
+
+The fix is two commits: [`54ccd48`](https://github.com/sinnercode228/slotbook/commit/54ccd486199c9392846f2730a82e3a3e73a830b4) for holds, blocks and reschedules, and [`939022a`](https://github.com/sinnercode228/slotbook/commit/939022ae1a3c00362d064e0a11dee60eb2d4958d) for confirmations, which I missed at first. `db.IsDeadlock` recognizes `40P01` the way `IsExclusionViolation` recognizes `23P01` ([`db.go#L51-L54`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/db/db.go#L51-L54)), and a new helper runs the transaction again when it sees one:
+
+```go
+// inTx runs fn in a transaction like pgx.BeginFunc and, when PostgreSQL
+// aborts the transaction as a deadlock victim (40P01), runs fn again from the
+// start in a new one, up to txAttempts times in all. When ctx is done it
+// stops retrying and returns the last error.
+//
+// Two writes that add overlapping periods to the exclusion constraint's index
+// at the same moment (inserts, or the update that confirms a hold) can each
+// wait for the other's entry, and the deadlock detector aborts one of them
+// instead of letting it fail with 23P01. With more such writes it aborts one
+// per deadlock_timeout until one is left. A victim that came straight back
+// with a new entry would join that chain again, so a retry starts by taking
+// an advisory lock and retries go one at a time.
+func inTx(ctx context.Context, b beginner, fn func(pgx.Tx) error) error {
+	for attempt := 1; ; attempt++ {
+		err := pgx.BeginFunc(ctx, b, func(tx pgx.Tx) error {
+			if attempt > 1 {
+				if _, err := tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtext('slotbook-deadlock-retry'))`); err != nil {
+					return err
+				}
+			}
+			return fn(tx)
+		})
+		if attempt == txAttempts || !db.IsDeadlock(err) {
+			return err
+		}
+		base := time.Millisecond << attempt
+		pause := time.NewTimer(base + rand.N(base))
+		select {
+		case <-ctx.Done():
+			pause.Stop()
+			return err
+		case <-pause.C:
+		}
+	}
+}
+```
+
+[`tx.go#L20-L54`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/tx.go#L20-L54)
+
+Before a retry it pauses for a random 2–4 ms, then 4–8, 8–16 and 16–32 ms, at most 60 ms over the five attempts. Only `40P01` is retried: `23P01` and every other error come back from the first attempt, as before. `insertHold`, `CreateBlock`, `Reschedule` and `Confirm` call `inTx(ctx, m.pool, ...)` where they called `pgx.BeginFunc`, with the same closure ([`admin.go#L46`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/admin.go#L46), [`manage.go#L126`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/manage.go#L126), [`confirm.go#L58`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/confirm.go#L58)). For a hold:
+
+```go
+func (m *Manager) insertHold(ctx context.Context, h newHold) (Booking, error) {
+	var b Booking
+	err := inTx(ctx, m.pool, func(tx pgx.Tx) error {
+		if err := expireStaleHolds(ctx, tx, h.staffID, h.start, h.busyUntil, h.now); err != nil {
+			return err
+		}
+		var err error
+		b, err = scanBooking(tx.QueryRow(ctx, `
+			INSERT INTO bookings (kind, status, location_id, staff_id, service_id, starts_at, ends_at, busy_until, period,
+			                      price_minor, currency, hold_token_hash, hold_expires_at, created_at)
+			VALUES ('appointment', 'held', $1, $2, $3, $4, $5, $6, tstzrange($4, $6, '[)'), $7, $8, $9, $10, $11)
+			RETURNING `+bookingColumns,
+			h.locationID, h.staffID, h.service.ID, h.start, h.end, h.busyUntil,
+			h.service.PriceMinor, h.service.Currency, h.tokenHash, h.expiresAt, h.now))
+		return err
+	})
+	if db.IsExclusionViolation(err) {
+		return Booking{}, ErrSlotTaken
+	}
+	if err != nil {
+		return Booking{}, fmt.Errorf("booking: insert hold: %w", err)
+	}
+	return b, nil
+}
+```
+
+[`hold.go#L133-L156`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/hold.go#L133-L156)
+
+The closure is the whole transaction, so a retry repeats all of it: the expiry of lapsed holds and the insert, and in a reschedule also the row lock, the cancel and the reminders. The mapping after it did not change: `23P01` is `ErrSlotTaken`, and a `40P01` that is still there after the fifth attempt is wrapped as before.
+
+A plain retry was not enough. With three or more inserts at the same moment, the check scans wait on one another, and PostgreSQL aborts one victim per `deadlock_timeout` until one inserter is left. A victim that retries at once puts a new entry into the index and joins that chain again. With a plain retry and a short backoff, eight goroutines still left 34 calls failing with `40P01` after five attempts, and in the 20-goroutine scenario described under the tests below, the one run that hit the chain went through 94 deadlock cycles and all 19 losers ended with `40P01`. That is why a retry takes the advisory lock before anything else: retries go one at a time and cannot keep the chain going. The first attempt takes no lock, so a request that meets no deadlock runs as before, and the constraint is still what rules out the overlap. The lock key is one for the whole database, so retries for different specialists also wait for each other. Over 300 rounds per size, the number of attempts each call needed:
+
+```
+goroutines per round   1 attempt   2 attempts   3 attempts   4 attempts
+                   4        1095           96            9            0
+                   8        2041          348           10            1
+                  16        4017          758           24            1
+```
+
+No call needed a fifth attempt, and none failed.
+
+My first commit missed one more write. Confirming a hold is one `UPDATE` from `held` to `confirmed` ([`confirm.go#L78-L84`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/confirm.go#L78-L84)). `status` is in the constraint's `WHERE`, so PostgreSQL cannot make it a HOT update: the new version of the row gets its own entry in `bookings_no_overlap`, and the same check runs as for an insert. A hold or a block inserted on that period at the same moment can wait for the confirm while the confirm waits for it. When PostgreSQL aborted the confirm, the customer who owned the hold got `500`, the insert retried and got `409`, and neither request succeeded. On `54ccd48` the confirm got `40P01` in 43 of 400 rounds against three blocks, in 13 of 400 against three holds, and in 19 to 25 of 400 against a mix of holds and blocks. `939022a` runs `Confirm` through `inTx` as well. The idempotency key reservation and the new manage token are inside the closure, so an aborted attempt's key row rolls back with it, and the token the customer gets is the one whose hash was committed.
+
+The retry does not make the chain shorter. With k simultaneous writes PostgreSQL still needs about (k − 1) × `deadlock_timeout` to resolve them, so a loser now gets `409`, but it can still get it late: in the 20-goroutine scenario at the default 1 s, the two runs that hit the chain took 19.0 s and 20.0 s.
+
+`54ccd48` adds three integration tests that race writes on one period, many rounds on one pool, and `939022a` adds a fourth:
+
+- [`TestSimultaneousHoldsNeverFailWithADeadlock`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/hold_test.go#L123-L142): 150 rounds of four holds.
+- [`TestSimultaneousBlocksAndHoldsNeverFailWithADeadlock`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/admin_test.go#L47-L68): 200 rounds of two blocks and two holds.
+- [`TestSimultaneousReschedulesNeverFailWithADeadlock`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/manage_test.go#L155-L198): 100 rounds of four reschedules onto one period. The winner moves back after each round, and every loser must still be `confirmed`.
+- [`TestSimultaneousConfirmsAndInsertsNeverFailWithADeadlock`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/confirm_test.go#L205-L248): 160 rounds of one confirm against two holds and a block. The confirm starts 0 to 975 µs late, in 25 µs steps that repeat every 40 rounds, so that its `UPDATE` meets the inserts.
+
+Every round must end with one success, `ErrSlotTaken` for all the others and one active row on the period ([`checkOneWinner`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/fixture_test.go#L115-L143)). The race fixture gives each goroutine its own connection and sets `deadlock_timeout` to 10 ms on every connection ([`fixture_test.go#L86-L92`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/fixture_test.go#L86-L92)), so a deadlock costs milliseconds instead of a second. A database role that may not change that setting skips these four tests. The hold test:
+
+```go
+// Two transactions that insert the same period at the same moment can each
+// find the other's uncommitted entry in the constraint's index and wait for
+// it; PostgreSQL's deadlock detector then aborts one of them with 40P01. The
+// loser must still get ErrSlotTaken. A round deadlocks only now and then, and
+// hardly ever while the index fits in one page (about the first 40 rounds
+// here), so the test runs many rounds on one pool.
+func TestSimultaneousHoldsNeverFailWithADeadlock(t *testing.T) {
+	const rounds, n = 150, 4
+	f := newRaceFixture(t, n)
+	ctx := context.Background()
+	start := at(2026, time.October, 14, 10, 0)
+	for round := range rounds {
+		errs := race(n, func(int) error {
+			_, err := f.manager.Hold(ctx, booking.HoldRequest{ServiceID: f.haircut(), StaffID: f.lena(), Start: start})
+			return err
+		})
+		f.checkOneWinner(t, round, errs, start, start.Add(time.Hour))
+		f.clearBookings(t)
+	}
+}
+```
+
+[`hold_test.go#L123-L142`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/hold_test.go#L123-L142)
+
+I ran the first three on the old code, the commit before the fix with only the new tests and their helpers added, 20 times each with `-race` and 20 times without. All 120 runs failed, every one on a `40P01` where `ErrSlotTaken` was expected. The first failing round was between 10 and 77 for holds, 1 and 66 for blocks, and 2 and 39 for reschedules:
+
+```
+hold_test.go:139: round 39: got booking: insert hold: ERROR: deadlock detected (SQLSTATE 40P01), want ErrSlotTaken
+admin_test.go:65: round 39: got booking: insert hold: ERROR: deadlock detected (SQLSTATE 40P01), want ErrSlotTaken
+manage_test.go:183: round 30: got ERROR: deadlock detected (SQLSTATE 40P01), want ErrSlotTaken
+```
+
+On code without the `Confirm` change, the confirm test failed all 30 of its runs, 15 with `-race` and 15 without, and 20 of 20 more with an earlier 50 µs step. Each failure was `round N: confirm: ERROR: deadlock detected (SQLSTATE 40P01)`, and over those 50 runs the first failing round was between 2 and 103. On `939022a` I ran each of the four tests 30 times with `-race` and 30 times without, together with `TestConcurrentHoldsOnTheSameSlotHaveOneWinner`: 300 runs, no failures, the slowest 3.38 s with `-race`.
+
+Four unit tests drive `inTx` with a fake `pgx.Tx` and an injected `40P01` ([`tx_test.go#L80-L150`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/tx_test.go#L80-L150)). It succeeds after four deadlocks with five transactions begun and one commit, and takes the advisory lock only from the second attempt on, before the closure. It gives up after the fifth attempt with the `40P01`, does not retry `23P01` or a domain error, and stops after one call when the context is cancelled.
 
 ## What the tests cover
 
 [`TestConcurrentHoldsOnTheSameSlotHaveOneWinner`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/hold_test.go#L76-L121) starts 20 goroutines that block on one channel, closes it, and lets all of them call `Hold` for Lena at 10:00. It expects exactly one success, 19 `ErrSlotTaken` and no other error, then counts the `held` rows in the table and expects one. The fixture asks for a pool of 25 connections; the test pool defaults to 8 ([`dbtest.go#L37`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/dbtest/dbtest.go#L37)), and with 8 most goroutines would queue for a connection instead of meeting in the database.
 
-The test has not caught the deadlock: it passed 200 runs out of 200 with `-race` and 200 without. Each run starts on a fresh pool. When I ran the same body after one unasserted round of the race on the same pool, it failed 3 times in 180 runs without `-race` and passed all 180 with it. In each failing run all 19 losers got `40P01`, and the runs took 16.20 s, 19.20 s and 19.22 s. Why the deadlock did not show up in the first round on a fresh pool, I have not pinned down.
+On the old code this test never caught the deadlock: it passed 200 runs out of 200 with `-race` and 200 without. Each run starts on a fresh pool. When I ran the same body after one unasserted round of the race on the same pool, it failed 3 times in 180 runs without `-race` and passed all 180 with it. In each failing run all 19 losers got `40P01`, and the runs took 16.20 s, 19.20 s and 19.22 s. With `deadlock_timeout` at 100 ms, the same body after a warm-up round failed 4 times in 300 runs, each time with all 19 losers on `40P01`. On `54ccd48` it failed in none of 300 runs at 100 ms, none of 250 at the default 1 s and none of 100 with `-race`. Two of the runs at 1 s hit the chain and took 19.0 s and 20.0 s, and no call needed more than three attempts.
 
-Next to it: the constraint tests in `db_test.go` (overlap, adjacent periods, inactive rows, the period CHECK), `TestOverlappingHoldIsSlotTaken` with the buffer (10:45 runs into a 10:00 haircut, 11:00 goes in), [`TestBlocksShareTheOverlapGuarantee`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/admin_test.go#L13-L45), the expiry, any-staff and reschedule tests above, and an HTTP test that expects `409 slot_taken` from `POST /v1/holds`. Each integration test gets its own freshly migrated schema. On an empty database, with PostgreSQL 16.13 and Go 1.24.7, `go test -race -count=1 ./...` passed 107 test functions and 92 subtests.
+While writing the fix I found part of the answer to why a fresh pool hid the deadlock. A scratch test logged the size of the `bookings_no_overlap` index in every round of four simultaneous holds. The index grew from one page to three at round 39, and right after that deadlocks became frequent, in about 20% of rounds; while it was a single page they were rare. Rare is not never: on `54ccd48`, one run of `TestConcurrentHoldsOnTheSameSlotHaveOneWinner` hit the full chain on a fresh pool, took 17.21 s and passed. That is why the race tests above run many rounds on one pool.
+
+Next to it: the constraint tests in `db_test.go` (overlap, adjacent periods, inactive rows, the period CHECK), `TestOverlappingHoldIsSlotTaken` with the buffer (10:45 runs into a 10:00 haircut, 11:00 goes in), [`TestBlocksShareTheOverlapGuarantee`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/booking/admin_test.go#L13-L45), the expiry, any-staff and reschedule tests above, an HTTP test that expects `409 slot_taken` from `POST /v1/holds`, and the four race tests and four `inTx` unit tests from the fix. Each integration test gets its own freshly migrated schema. On an empty database, with PostgreSQL 16.13 and Go 1.24.7, `go test -race -count=1 ./...` passed 115 test functions and 92 subtests at `939022a`, up from 107 and 92 at `1c83184`.
 
 ## Known limitations
 
-- The `40P01` case above: a loser of a simultaneous insert can get `500` after a second or more instead of `409`.
-- Of the paths that write busy time, only holds are raced in a test. Blocks and reschedules go through the same constraint, but their tests send one request at a time.
+- Reschedules are raced only against each other. A hold released at the same moment almost always commits before a reschedule reaches its insert, because the reschedule makes more round trips first (about 2.9 ms against 1.7 ms for a hold), and one or three reschedules racing holds deadlocked in at most 1 of 300 rounds. That mix goes through the same `inTx`, but no test covers it.
 - `POST /v1/holds` needs no login and has no rate limit. A script can keep every slot of a salon held, ten minutes at a time, and the constraint protects those holds like real ones.
 - No call releases a hold. The booking routes are `POST /v1/holds`, `POST /v1/bookings`, and `GET`, `cancel` and `reschedule` on a booking ([`server.go#L61-L65`](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/httpapi/server.go#L61-L65)). A customer who goes back and picks another time leaves the first one blocked until it runs out.
 - Hold expiry compares `hold_expires_at` with the API process's clock, `m.clock.Now()`, not with the database's `now()`. Two API processes whose clocks differ disagree by that much on when a hold has run out.
 - The demo on GitHub Pages has no PostgreSQL. It runs a TypeScript port of these rules over IndexedDB, and there the two-tab race is settled by IndexedDB running `readwrite` transactions one at a time, not by this constraint.
+
+Fix: [`54ccd48` Stop answering 500 when simultaneous inserts of one period deadlock](https://github.com/sinnercode228/slotbook/commit/54ccd486199c9392846f2730a82e3a3e73a830b4), [`939022a` Stop answering 500 when a confirm deadlocks with a simultaneous insert on its period](https://github.com/sinnercode228/slotbook/commit/939022ae1a3c00362d064e0a11dee60eb2d4958d) · Tests: [`hold_test.go#L123-L142`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/hold_test.go#L123-L142), [`confirm_test.go#L205-L248`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/confirm_test.go#L205-L248), [`tx_test.go`](https://github.com/sinnercode228/slotbook/blob/939022ae1a3c00362d064e0a11dee60eb2d4958d/internal/booking/tx_test.go)
 
 Code: [github.com/sinnercode228/slotbook](https://github.com/sinnercode228/slotbook)

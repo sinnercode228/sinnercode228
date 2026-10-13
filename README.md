@@ -62,7 +62,7 @@ Smaller demos are in [portfolio](https://github.com/sinnercode228/portfolio): a 
 Write-ups on how specific parts of these projects work. Each one quotes the code, links to the lines at a pinned commit, then says what the tests cover and where the code is still thin. Index: [notes/](notes/).
 
 - [The trial balance was zero and the invoice was written off twice](notes/ledgerline-balanced-but-wrong.md): a retry loop working from stale invoice copies, and the invariants that catch what the trial balance cannot
-- [Two tabs, one slot: letting PostgreSQL refuse the second booking](notes/slotbook-exclusion-constraint.md): a check in Go that gave one slot to 14 of 20 requests, and the deadlock that turns a `409` into a `500`
+- [Two tabs, one slot: letting PostgreSQL refuse the second booking](notes/slotbook-exclusion-constraint.md): a check in Go that gave one slot to 14 of 20 requests, and the retry that stopped a deadlock from turning a `409` into a `500`
 - [Berlin on 29 March: booking slots across a DST change without adding 24 hours](notes/slotbook-dst-slots.md): dates walked on UTC midnights, and 23 vectors shared by Go and TypeScript
 - [The late ack was the small bug: fencing a Redis queue with the lease deadline](notes/relay-lease-fencing.md): part 2, where the fencing token turns up a worse bug
 - [My Redis queue claimed jobs atomically and still handed the same job to two workers](notes/relay-queue-races.md): two races, a test that forces them on every run, and the fix
@@ -76,6 +76,7 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 Bugs I found in my own projects, each fixed with a test that failed first:
 
+- Slotbook: two writes on one period at the same moment could deadlock inside PostgreSQL's exclusion-constraint check, and the request whose transaction the deadlock detector aborted got `500`: a loser instead of `409 slot_taken`, a confirmation instead of going through; holds, blocks, reschedules and confirmations now run the transaction again on `40P01` ([`54ccd48`](https://github.com/sinnercode228/slotbook/commit/54ccd486199c9392846f2730a82e3a3e73a830b4), [`939022a`](https://github.com/sinnercode228/slotbook/commit/939022ae1a3c00362d064e0a11dee60eb2d4958d); see [the write-up](notes/slotbook-exclusion-constraint.md))
 - Ledgerline: when a failed retry ended dunning inside the retry loop, every open invoice was written off, and the loop's stale copy of the next one reopened it, recorded another payment attempt and wrote it off a second time; the trial balance stayed at zero ([`b8aabf0`](https://github.com/sinnercode228/ledgerline-billing/commit/b8aabf0576976b7dade1b8158720c4b6c4cc7c99); see [the write-up](notes/ledgerline-balanced-but-wrong.md))
 - Slotbook: the notification worker sent a claimed batch one row at a time under one lease, so with slow sends a row late in the batch could be reclaimed by another worker and sent by both; each row's lease is now renewed right before its send ([`a38902f`](https://github.com/sinnercode228/slotbook/commit/a38902fac3d147b686191bbc63534f8b2b3f0193))
 - Relay: two claim races with several workers on one Redis, then a stale worker overwriting the new owner's record ([`b0ae35c`](https://github.com/sinnercode228/integration-hub/commit/b0ae35c14d753930be6c89155cdc75d31b861ff6), [`8c6ccb4`](https://github.com/sinnercode228/integration-hub/commit/8c6ccb42a436863df19aadec3e896cd45b4cf98f); see the two Relay notes above)
@@ -109,7 +110,7 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 Разборы того, как устроены отдельные части проектов, с кодом и ссылками на строки:
 
 - [Оборотная ведомость сходилась в ноль, а счёт списали дважды](notes/ledgerline-balanced-but-wrong.ru.md): цикл повторов на устаревших копиях счетов и инварианты, которые видят то, чего не видит оборотная ведомость
-- [Две вкладки, один слот: вторую запись отклоняет сам PostgreSQL](notes/slotbook-exclusion-constraint.ru.md): проверка на Go, которая отдала один слот 14 запросам из 20, и дедлок, из-за которого `409` превращается в `500`
+- [Две вкладки, один слот: вторую запись отклоняет сам PostgreSQL](notes/slotbook-exclusion-constraint.ru.md): проверка на Go, которая отдала один слот 14 запросам из 20, и повтор транзакции, после которого дедлок больше не превращает `409` в `500`
 - [Берлин, 29 марта: слоты записи при переводе часов без прибавления 24 часов](notes/slotbook-dst-slots.ru.md): даты по полуночам UTC и 23 вектора, общие для Go и TypeScript
 - [Поздний ack оказался мелочью: fencing token из срока аренды в очереди на Redis](notes/relay-lease-fencing.ru.md): вторая часть, где fencing token вскрывает ошибку посерьёзнее
 - [Очередь на Redis атомарно забирала задачи и всё равно отдавала одну и ту же двум воркерам](notes/relay-queue-races.ru.md): две гонки, тест, который ловит их при каждом запуске, и исправление
