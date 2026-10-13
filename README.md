@@ -32,10 +32,10 @@ The demos run on GitHub Pages without a backend. The API is replaced by code in 
 **[Pulse](https://github.com/sinnercode228/pulse-analytics)** · TypeScript, Fastify, SQLite, React · [demo](https://sinnercode228.github.io/pulse-analytics/) · [write-up](notes/pulse-hyperloglog.md)\
 Cookieless web analytics with uptime monitoring. Each rollup row stores a [HyperLogLog sketch](https://github.com/sinnercode228/pulse-analytics/blob/96645e153317f7bc35e5fc17bf4f76424d83c7c3/packages/core/src/hll.ts#L3-L7): an exact set up to 512 hashes, then 2048 registers. That is how unique visitors are merged across time buckets.
 
-**[Ledgerline](https://github.com/sinnercode228/ledgerline-billing)** · TypeScript, Fastify, PostgreSQL, React · [demo](https://sinnercode228.github.io/ledgerline-billing/)\
+**[Ledgerline](https://github.com/sinnercode228/ledgerline-billing)** · TypeScript, Fastify, PostgreSQL, React · [demo](https://sinnercode228.github.io/ledgerline-billing/) · [write-up](notes/ledgerline-balanced-but-wrong.md)\
 Subscription billing with trials, proration, gapless invoice numbers, dunning and a double-entry ledger. A [constraint trigger deferred to COMMIT](https://github.com/sinnercode228/ledgerline-billing/blob/442e27c08854c39821ade0cbfe7ebe67bffd2c1c/server/migrations/002_ledger_guards.sql#L7-L50) rejects any journal transaction whose entries do not sum to zero, whatever code wrote it. The demo runs the same engine in the browser, with a test clock that moves a day, a week or a month at a time.
 
-**[Slotbook](https://github.com/sinnercode228/slotbook)** · Go, PostgreSQL, React · [demo](https://sinnercode228.github.io/slotbook/)\
+**[Slotbook](https://github.com/sinnercode228/slotbook)** · Go, PostgreSQL, React · [demo](https://sinnercode228.github.io/slotbook/) · [write-up](notes/slotbook-exclusion-constraint.md)\
 Online booking for salons, with a booking widget and a staff day view. Double booking is ruled out by [one `EXCLUDE USING gist` constraint](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/db/migrations/0001_schema.sql#L111-L113), not by a check in Go: when 20 goroutines hold the same slot, exactly one succeeds. 23 JSON vectors pin how slots behave across DST changes, and both the Go generator and its TypeScript port pass them.
 
 **[Relay](https://github.com/sinnercode228/integration-hub)** · Python, FastAPI, Redis, SQLite, React · [demo](https://sinnercode228.github.io/integration-hub/) · [write-up](notes/relay-redis-lease-queue.md)\
@@ -61,6 +61,9 @@ Smaller demos are in [portfolio](https://github.com/sinnercode228/portfolio): a 
 
 Write-ups on how specific parts of these projects work. Each one quotes the code, links to the lines at a pinned commit, then says what the tests cover and where the code is still thin. Index: [notes/](notes/).
 
+- [The trial balance was zero and the invoice was written off twice](notes/ledgerline-balanced-but-wrong.md): a retry loop working from stale invoice copies, and the invariants that catch what the trial balance cannot
+- [Two tabs, one slot: letting PostgreSQL refuse the second booking](notes/slotbook-exclusion-constraint.md): a check in Go that gave one slot to 14 of 20 requests, and the deadlock that turns a `409` into a `500`
+- [Berlin on 29 March: booking slots across a DST change without adding 24 hours](notes/slotbook-dst-slots.md): dates walked on UTC midnights, and 23 vectors shared by Go and TypeScript
 - [The late ack was the small bug: fencing a Redis queue with the lease deadline](notes/relay-lease-fencing.md): part 2, where the fencing token turns up a worse bug
 - [My Redis queue claimed jobs atomically and still handed the same job to two workers](notes/relay-queue-races.md): two races, a test that forces them on every run, and the fix
 - [Relay's delivery queue on two Redis sorted sets with a 120-second lease](notes/relay-redis-lease-queue.md)
@@ -71,8 +74,10 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Recently fixed
 
-Bugs I filed against my own projects or found while writing the notes, each fixed with a test that failed first:
+Bugs I found in my own projects, each fixed with a test that failed first:
 
+- Ledgerline: when a failed retry ended dunning inside the retry loop, every open invoice was written off, and the loop's stale copy of the next one reopened it, recorded another payment attempt and wrote it off a second time; the trial balance stayed at zero ([`b8aabf0`](https://github.com/sinnercode228/ledgerline-billing/commit/b8aabf0576976b7dade1b8158720c4b6c4cc7c99); see [the write-up](notes/ledgerline-balanced-but-wrong.md))
+- Slotbook: the notification worker sent a claimed batch one row at a time under one lease, so with slow sends a row late in the batch could be reclaimed by another worker and sent by both; each row's lease is now renewed right before its send ([`a38902f`](https://github.com/sinnercode228/slotbook/commit/a38902fac3d147b686191bbc63534f8b2b3f0193))
 - Relay: two claim races with several workers on one Redis, then a stale worker overwriting the new owner's record ([`b0ae35c`](https://github.com/sinnercode228/integration-hub/commit/b0ae35c14d753930be6c89155cdc75d31b861ff6), [`8c6ccb4`](https://github.com/sinnercode228/integration-hub/commit/8c6ccb42a436863df19aadec3e896cd45b4cf98f); see the two Relay notes above)
 - Relay: an event stored but never queued when enqueue fails ([issue #1](https://github.com/sinnercode228/integration-hub/issues/1), [`c845ca0`](https://github.com/sinnercode228/integration-hub/commit/c845ca096591389e34603adba0a22f3bbac12368))
 - DocMind: `docmind ask` finding nothing after `docmind ingest` with default settings, and `[0]` turning into a citation ([issue #1](https://github.com/sinnercode228/docmind-rag/issues/1), [`d89f9ea`](https://github.com/sinnercode228/docmind-rag/commit/d89f9ea1a8f19103ae485af111d1c3dec5baae39))
@@ -103,6 +108,9 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 
 Разборы того, как устроены отдельные части проектов, с кодом и ссылками на строки:
 
+- [Оборотная ведомость сходилась в ноль, а счёт списали дважды](notes/ledgerline-balanced-but-wrong.ru.md): цикл повторов на устаревших копиях счетов и инварианты, которые видят то, чего не видит оборотная ведомость
+- [Две вкладки, один слот: вторую запись отклоняет сам PostgreSQL](notes/slotbook-exclusion-constraint.ru.md): проверка на Go, которая отдала один слот 14 запросам из 20, и дедлок, из-за которого `409` превращается в `500`
+- [Берлин, 29 марта: слоты записи при переводе часов без прибавления 24 часов](notes/slotbook-dst-slots.ru.md): даты по полуночам UTC и 23 вектора, общие для Go и TypeScript
 - [Поздний ack оказался мелочью: fencing token из срока аренды в очереди на Redis](notes/relay-lease-fencing.ru.md): вторая часть, где fencing token вскрывает ошибку посерьёзнее
 - [Очередь на Redis атомарно забирала задачи и всё равно отдавала одну и ту же двум воркерам](notes/relay-queue-races.ru.md): две гонки, тест, который ловит их при каждом запуске, и исправление
 - [Очередь доставок Relay на двух sorted set в Redis с арендой задачи на 120 секунд](notes/relay-redis-lease-queue.ru.md)
