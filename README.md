@@ -2,7 +2,7 @@
 
 [По-русски](#по-русски)
 
-I have done commercial web development since 2019. Now I build web products end to end and work on existing systems. The public projects below cover APIs, integrations, Telegram bots and Mini Apps, and LLM features.
+I have done commercial web development since 2019. Now I build web products end to end and work on existing systems. The public projects below cover APIs, online booking and subscription billing, integrations, Telegram bots and Mini Apps, and LLM features.
 
 Open to contract work: a fixed-price project, hourly or monthly work, a seat on your team, or taking over an existing codebase. Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercode228.github.io/portfolio/?lang=en)
 
@@ -31,6 +31,12 @@ The demos run on GitHub Pages without a backend. The API is replaced by code in 
 
 **[Pulse](https://github.com/sinnercode228/pulse-analytics)** · TypeScript, Fastify, SQLite, React · [demo](https://sinnercode228.github.io/pulse-analytics/) · [write-up](notes/pulse-hyperloglog.md)\
 Cookieless web analytics with uptime monitoring. Each rollup row stores a [HyperLogLog sketch](https://github.com/sinnercode228/pulse-analytics/blob/96645e153317f7bc35e5fc17bf4f76424d83c7c3/packages/core/src/hll.ts#L3-L7): an exact set up to 512 hashes, then 2048 registers. That is how unique visitors are merged across time buckets.
+
+**[Ledgerline](https://github.com/sinnercode228/ledgerline-billing)** · TypeScript, Fastify, PostgreSQL, React · [demo](https://sinnercode228.github.io/ledgerline-billing/)\
+Subscription billing with trials, proration, gapless invoice numbers, dunning and a double-entry ledger. A [constraint trigger deferred to COMMIT](https://github.com/sinnercode228/ledgerline-billing/blob/442e27c08854c39821ade0cbfe7ebe67bffd2c1c/server/migrations/002_ledger_guards.sql#L7-L50) rejects any journal transaction whose entries do not sum to zero, whatever code wrote it. The demo runs the same engine in the browser, with a test clock that moves a day, a week or a month at a time.
+
+**[Slotbook](https://github.com/sinnercode228/slotbook)** · Go, PostgreSQL, React · [demo](https://sinnercode228.github.io/slotbook/)\
+Online booking for salons, with a booking widget and a staff day view. Double booking is ruled out by [one `EXCLUDE USING gist` constraint](https://github.com/sinnercode228/slotbook/blob/1c8318474319f6e61cc76a3bbc5b5911625d7c1e/internal/db/migrations/0001_schema.sql#L111-L113), not by a check in Go: when 20 goroutines hold the same slot, exactly one succeeds. 23 JSON vectors pin how slots behave across DST changes, and both the Go generator and its TypeScript port pass them.
 
 **[Relay](https://github.com/sinnercode228/integration-hub)** · Python, FastAPI, Redis, SQLite, React · [demo](https://sinnercode228.github.io/integration-hub/) · [write-up](notes/relay-redis-lease-queue.md)\
 Takes webhooks from Tilda, amoCRM and Bitrix24 and delivers them to Telegram, Google Sheets, amoCRM and email. The [Redis queue is built on sorted sets](https://github.com/sinnercode228/integration-hub/blob/b0ae35c14d753930be6c89155cdc75d31b861ff6/backend/src/relay/queue/redis.py#L29-L47): a worker claims a job with a lease (120 seconds by default) in one Lua script, and if the worker dies, the job goes back to the queue when the lease runs out.
@@ -84,7 +90,7 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 
 ## По-русски
 
-Коммерческая веб-разработка с 2019 года. Сейчас занимаюсь разработкой веб-продуктов полного цикла и развитием существующих систем. В открытых проектах выше — API, интеграции, Telegram-боты и Mini Apps, функции на LLM. Беру проекты с фиксированной ценой, почасовую и помесячную работу, могу войти в вашу команду или разобраться в чужом коде.
+Коммерческая веб-разработка с 2019 года. Сейчас занимаюсь разработкой веб-продуктов полного цикла и развитием существующих систем. В открытых проектах выше — API, онлайн-запись и биллинг подписок, интеграции, Telegram-боты и Mini Apps, функции на LLM. Беру проекты с фиксированной ценой, почасовую и помесячную работу, могу войти в вашу команду или разобраться в чужом коде.
 
 - **2025 — сейчас.** Senior Full-Stack Developer, independent / contract. Полный цикл разработки веб-продуктов и развитие существующих систем.
 - **2023–2025.** Full-Stack Developer, независимые проекты и контракты. Сервисы с подписками, платёжными интеграциями и автоматизацией.
