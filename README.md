@@ -63,12 +63,14 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 - [How DocMind sends sources before the first token and links [n] markers mid-stream](notes/docmind-sources-before-tokens.md)
 - [How Pulse counts unique visitors with a daily salt and a sparse-to-dense HyperLogLog](notes/pulse-hyperloglog.md)
 
-## Open issues
+## Recently fixed
 
-Bugs I filed against my own projects and haven't fixed yet:
+Bugs I filed against my own projects or found while writing the notes, each fixed with a test that failed first:
 
-- [Relay: an event is stored but never queued if enqueue fails](https://github.com/sinnercode228/integration-hub/issues/1)
-- [DocMind: `docmind ask` finds nothing after `docmind ingest` with default settings](https://github.com/sinnercode228/docmind-rag/issues/1)
+- Relay: two claim races with several workers on one Redis, then a stale worker overwriting the new owner's record ([`b0ae35c`](https://github.com/sinnercode228/integration-hub/commit/b0ae35c14d753930be6c89155cdc75d31b861ff6), [`8c6ccb4`](https://github.com/sinnercode228/integration-hub/commit/8c6ccb42a436863df19aadec3e896cd45b4cf98f); see the two Relay notes above)
+- Relay: an event stored but never queued when enqueue fails ([issue #1](https://github.com/sinnercode228/integration-hub/issues/1), [`c845ca0`](https://github.com/sinnercode228/integration-hub/commit/c845ca096591389e34603adba0a22f3bbac12368))
+- DocMind: `docmind ask` finding nothing after `docmind ingest` with default settings, and `[0]` turning into a citation ([issue #1](https://github.com/sinnercode228/docmind-rag/issues/1), [`d89f9ea`](https://github.com/sinnercode228/docmind-rag/commit/d89f9ea1a8f19103ae485af111d1c3dec5baae39))
+- Zernolist: two payments, or a payment and a cancel, racing on one order on SQLite ([`fa866de`](https://github.com/sinnercode228/tg-shop-miniapp/commit/fa866decb9ae35c63ae8a0a74d6b9f99d7ad615d))
 
 ## Contact
 
@@ -86,6 +88,8 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 - **2019–2021.** Web Developer, фриланс. Сайты и интернет-магазины для малого бизнеса.
 
 Коммерческий код из этой работы закрыт, поэтому открытые репозитории выше — самостоятельные проекты на выдуманных данных. README у них на английском; у всех, кроме Relay, есть русская версия или короткий пересказ по-русски.
+
+Ошибки, которые я нашёл у себя и исправил, каждую с тестом, который сначала падал, перечислены выше в разделе Recently fixed.
 
 Разборы того, как устроены отдельные части проектов, с кодом и ссылками на строки:
 

@@ -107,6 +107,8 @@ Inside the queue, one delivery is one member. Duplicate webhooks are stopped ear
 
 ## The gap at intake
 
+Update: fixed in [`c845ca0`](https://github.com/sinnercode228/integration-hub/commit/c845ca096591389e34603adba0a22f3bbac12368), which closes issue #1. When none of an event's jobs reach the queue, intake marks the deliveries dead and releases the key, so the retry is accepted; if some jobs got in, the key is kept. A sweep at startup and once per lease gives a job to pending or retrying deliveries that lost theirs, in one atomic check-and-add. The text below describes the code at `46390a3`.
+
 The key is claimed before anything is stored and released in one case only:
 
 ```python

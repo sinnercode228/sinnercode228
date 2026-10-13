@@ -147,6 +147,8 @@ The backend suite runs on the in-memory store, and `pgvector.py` has no test. No
 
 ## Where citations can still go wrong
 
+Update: [`d89f9ea`](https://github.com/sinnercode228/docmind-rag/commit/d89f9ea1a8f19103ae485af111d1c3dec5baae39) fixes three of the items below. `[0]` is no longer a citation in the web UI or the bot, card ids include the message id, and on startup the container reindexes ready documents whose vectors the in-memory store has lost (issue #1, closed). The text below describes the code at `6d8b1b2`.
+
 - `cited` only means the number appears in the text and is in range; nothing checks that the passage supports the sentence. The highlighted sentence in a card is picked against the question, not the answer ([`service.py#L61`](https://github.com/sinnercode228/docmind-rag/blob/6d8b1b24fd2b3a06cbc685e1b0702e8243269cc4/backend/src/docmind/rag/service.py#L61)), so with a real model it can differ from the one the model used.
 - None of the three citation regexes (server, web client, bot) accepts `[1, 2]` or `[1-3]`. A model that cites only in that form gets `cited: []`, grey badges everywhere and markers that cannot be clicked.
 - Card ids (`cite-<chunk_id>`) are not scoped to a message. When two answers in a conversation retrieved the same chunk, `getElementById` returns the earlier answer's card and the page scrolls there; the active ring still lands on the right card.
