@@ -125,6 +125,8 @@ Tiers are not built from each other. Each pageview writes its minute, hour and d
 
 ## How far off the counts are
 
+Update: [PR #3](https://github.com/sinnercode228/pulse-analytics/pull/3) adds the HLL++ bias correction. A dense sketch now uses linear counting up to an estimate of 1,800, and above that the raw estimate minus the empirical bias from the HLL++ paper's table for precision 11, up to 5·m = 10,240. With the same 50 sets per size, the 5,000 row drops from rms 3.27% and worst 7.88% to 1.82% and 5.80%; 10,000 goes from 1.98% to 1.99%, and the other rows do not change. The text below describes the code at `96645e1`.
+
 The comment on `HLL_PRECISION` says ~2.3%, the textbook 1.04/√2048 ≈ 2.30%. Traffic in Pulse is synthetic anyway, so I measured on generated ids: 50 sets per size, hashed by `addString`, the same seed-0 `hash32` that `RollupBuilder` uses. From the repo root:
 
 ```bash
@@ -179,6 +181,8 @@ Not covered: `SaltStore` and `visitorId` have no direct test, and no test sits o
 ## Trade-offs and gaps
 
 Update: [`5239238`](https://github.com/sinnercode228/pulse-analytics/commit/5239238777535dbebbe697f76cea3e3c538ffdd9) corrects the `SaltStore` comment and adds the missing tests: salt retention across days and restarts, and the switch from exact to dense at 512/513 hashes. The text below describes the code at `96645e1`.
+
+Update: [PR #3](https://github.com/sinnercode228/pulse-analytics/pull/3) adds the bias correction that the fourth item below says is missing; at 5,000 ids the rms error is now 1.82%, down from 3.27%. There is still no large-range correction.
 
 - A new salt every UTC day means a new id every day, so "Unique visitors" over a week is closer to visitor-days than to people. A visitor active on both sides of midnight UTC counts twice in any range that spans it; for a site outside UTC that includes a single local day.
 - Today's and yesterday's salts are in the same file as the sketches. For those two days, anyone holding the file can test a guessed IP and User-Agent against a sparse sketch. After the salt is deleted, that takes 16 unknown random bytes.
