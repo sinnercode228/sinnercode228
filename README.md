@@ -72,10 +72,15 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 - [How DocMind sends sources before the first token and links [n] markers mid-stream](notes/docmind-sources-before-tokens.md)
 - [How Pulse counts unique visitors with a daily salt and a sparse-to-dense HyperLogLog](notes/pulse-hyperloglog.md)
 
+## Open issues
+
+- DocMind: grouped citations like `[1, 2]` are not recognized ([#2](https://github.com/sinnercode228/docmind-rag/issues/2), PR [#3](https://github.com/sinnercode228/docmind-rag/pull/3) ready)
+
 ## Recently fixed
 
 Bugs I found in my own projects, each fixed with a test that failed first:
 
+- Home AI flows: task owner resolved to the wrong attendee when two attendees shared a first name; the first-name fallback now only fires when exactly one attendee matches ([issue #3](https://github.com/sinnercode228/n8n-home-ai-workflows/issues/3), [#5](https://github.com/sinnercode228/n8n-home-ai-workflows/pull/5))
 - Relay: a connection error or timeout on the amoCRM note, the request that follows the lead, made the worker retry the delivery and create the lead a second time; any failure of the note now goes into the delivery's result, and the note gives up before the attempt's timeout ([`fb4dbe9`](https://github.com/sinnercode228/integration-hub/commit/fb4dbe9c08d417cd35ccbdfa7bdc3edb0c5e068d))
 - Slotbook: two writes on one period at the same moment could deadlock inside PostgreSQL's exclusion-constraint check, and the request whose transaction the deadlock detector aborted got `500`: a loser instead of `409 slot_taken`, a confirmation instead of going through; holds, blocks, reschedules and confirmations now run the transaction again on `40P01` ([`54ccd48`](https://github.com/sinnercode228/slotbook/commit/54ccd486199c9392846f2730a82e3a3e73a830b4), [`939022a`](https://github.com/sinnercode228/slotbook/commit/939022ae1a3c00362d064e0a11dee60eb2d4958d); see [the write-up](notes/slotbook-exclusion-constraint.md))
 - Ledgerline: when a failed retry ended dunning inside the retry loop, every open invoice was written off, and the loop's stale copy of the next one reopened it, recorded another payment attempt and wrote it off a second time; the trial balance stayed at zero ([`b8aabf0`](https://github.com/sinnercode228/ledgerline-billing/commit/b8aabf0576976b7dade1b8158720c4b6c4cc7c99); see [the write-up](notes/ledgerline-balanced-but-wrong.md))
