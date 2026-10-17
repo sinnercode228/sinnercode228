@@ -2,7 +2,7 @@
 
 [По-русски](#по-русски)
 
-I have done commercial web development since 2019. Now I build web products end to end and work on existing systems. The public projects below cover APIs, online booking and subscription billing, integrations, Telegram bots and Mini Apps, and LLM features.
+I have done commercial web development since 2019. Now I build web products end to end and work on existing systems. The public projects below cover APIs, online booking and subscription billing, integrations, Telegram bots and Mini Apps, and LLM features; two Python libraries that grew out of them are on PyPI.
 
 Open to contract work: a fixed-price project, hourly or monthly work, a seat on your team, or taking over an existing codebase. Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercode228.github.io/portfolio/?lang=en)
 
@@ -24,6 +24,16 @@ Internal web apps for sales departments and service companies: a CRM for handlin
 Websites and online stores for small businesses: an auto parts store with CSV import, a site for a chain of repair shops with a cost calculator and requests sent to a CRM, WordPress sites with custom themes. JavaScript, PHP, WordPress, MySQL.
 
 The commercial code from this work is private, so the public repositories below are standalone projects built on made-up data.
+
+## Libraries
+
+Both are on PyPI at version 0.1.0, MIT licensed, for Python 3.10 or newer.
+
+**[aiogram-stars](https://github.com/sinnercode228/aiogram-stars)** · Python, aiogram 3, SQLAlchemy, SQLite, PostgreSQL · [PyPI](https://pypi.org/project/aiogram-stars/) · `pip install aiogram-stars`\
+Telegram Stars payments for aiogram 3, extracted from the payment code of [Zernolist](https://github.com/sinnercode228/tg-shop-miniapp): signed invoice payloads, a pre-checkout answer within Telegram's 10-second deadline, and a refund outbox in SQLite or PostgreSQL that retries `refundStarPayment` on errors. `on_paid` runs once per charge: the payment row is [inserted with `ON CONFLICT (charge_id) DO NOTHING`](https://github.com/sinnercode228/aiogram-stars/blob/d601bc348503130979eee6c2313de45265dbb23d/src/aiogram_stars/sqlalchemy.py#L364-L369), only the handler whose insert went through calls it, and a test feeds one update three times to each of two dispatchers on one database.
+
+**[aioamocrm](https://github.com/sinnercode228/aioamocrm)** · Python, httpx, pydantic 2 · [PyPI](https://pypi.org/project/aioamocrm/) · `pip install aioamocrm`\
+Async client for the amoCRM and Kommo API v4 that grew out of the amoCRM connector in [Relay](https://github.com/sinnercode228/integration-hub): OAuth2 with refresh-token rotation, requests spaced at 7 per second, pagination, typed models and webhook parsing. After a 429, a 5xx or a timeout, a request is resent only if [its method is idempotent or the call passed `retry=True`](https://github.com/sinnercode228/aioamocrm/blob/a35f0c86ac0521a8397e90ae79e3fb32dad88caa/src/aioamocrm/_client.py#L264-L265), because amoCRM has no idempotency keys and a resent `POST` can create the lead twice. The tests run on mocked HTTP, with request and answer shapes checked against amoCRM's official PHP SDK, not a live account.
 
 ## Public projects
 
@@ -110,6 +120,11 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 - **2019–2021.** Web Developer, фриланс. Сайты и интернет-магазины для малого бизнеса.
 
 Коммерческий код из этой работы закрыт, поэтому открытые репозитории выше — самостоятельные проекты на выдуманных данных. README у них на английском; у всех, кроме Relay, есть русская версия или короткий пересказ по-русски.
+
+Две мои библиотеки на Python опубликованы на PyPI, обе пока в версии 0.1.0:
+
+- [aiogram-stars](https://github.com/sinnercode228/aiogram-stars), [PyPI](https://pypi.org/project/aiogram-stars/): библиотека для оплаты в Telegram Stars в ботах на aiogram 3, которая подписывает payload счёта, успевает ответить на pre-checkout за десять секунд, вызывает `on_paid` один раз на платёж и повторяет неудавшиеся возвраты; я вынес её из платёжного кода Zernolist
+- [aioamocrm](https://github.com/sinnercode228/aioamocrm), [PyPI](https://pypi.org/project/aioamocrm/): асинхронный клиент API v4 amoCRM и Kommo, который сам обновляет OAuth2-токены и сохраняет новый refresh-токен, отправляет не больше 7 запросов в секунду и без `retry=True` не повторяет запросы на запись; вырос из коннектора amoCRM в Relay, форматы запросов и ответов сверены с официальным PHP SDK amoCRM, живого аккаунта за тестами пока нет
 
 Ошибки, которые я нашёл у себя и исправил, каждую с тестом, который сначала падал, перечислены выше в разделе Recently fixed.
 
