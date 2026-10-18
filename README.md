@@ -85,12 +85,12 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 ## Open issues
 
 - DocMind: grouped citations like `[1, 2]` are not recognized ([#2](https://github.com/sinnercode228/docmind-rag/issues/2), PR [#3](https://github.com/sinnercode228/docmind-rag/pull/3) ready)
-- Zernolist: a `pending` openInvoice result is shown as "payment cancelled" ([#5](https://github.com/sinnercode228/tg-shop-miniapp/issues/5), PR [#6](https://github.com/sinnercode228/tg-shop-miniapp/pull/6) ready)
 
 ## Recently fixed
 
 Bugs I found in my own projects, each fixed with a test that failed first:
 
+- Zernolist: a `pending` result from `openInvoice` was collapsed into `payment=cancelled` on the redirect, so the Mini App told the user the payment had been cancelled although the Stars charge might still land; the status is now carried through and the pending case has its own note ([issue #5](https://github.com/sinnercode228/tg-shop-miniapp/issues/5), [#6](https://github.com/sinnercode228/tg-shop-miniapp/pull/6))
 - Home AI flows: task owner resolved to the wrong attendee when two attendees shared a first name; the first-name fallback now only fires when exactly one attendee matches ([issue #3](https://github.com/sinnercode228/n8n-home-ai-workflows/issues/3), [#5](https://github.com/sinnercode228/n8n-home-ai-workflows/pull/5))
 - Relay: a connection error or timeout on the amoCRM note, the request that follows the lead, made the worker retry the delivery and create the lead a second time; any failure of the note now goes into the delivery's result, and the note gives up before the attempt's timeout ([`fb4dbe9`](https://github.com/sinnercode228/integration-hub/commit/fb4dbe9c08d417cd35ccbdfa7bdc3edb0c5e068d))
 - Slotbook: two writes on one period at the same moment could deadlock inside PostgreSQL's exclusion-constraint check, and the request whose transaction the deadlock detector aborted got `500`: a loser instead of `409 slot_taken`, a confirmation instead of going through; holds, blocks, reschedules and confirmations now run the transaction again on `40P01` ([`54ccd48`](https://github.com/sinnercode228/slotbook/commit/54ccd486199c9392846f2730a82e3a3e73a830b4), [`939022a`](https://github.com/sinnercode228/slotbook/commit/939022ae1a3c00362d064e0a11dee60eb2d4958d); see [the write-up](notes/slotbook-exclusion-constraint.md))
