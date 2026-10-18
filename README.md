@@ -85,6 +85,7 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 ## Open issues
 
 - DocMind: grouped citations like `[1, 2]` are not recognized ([#2](https://github.com/sinnercode228/docmind-rag/issues/2), PR [#3](https://github.com/sinnercode228/docmind-rag/pull/3) ready)
+- Zernolist: a `pending` openInvoice result is shown as "payment cancelled" ([#5](https://github.com/sinnercode228/tg-shop-miniapp/issues/5), PR [#6](https://github.com/sinnercode228/tg-shop-miniapp/pull/6) ready)
 
 ## Recently fixed
 
