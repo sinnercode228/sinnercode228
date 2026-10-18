@@ -29,7 +29,7 @@ The commercial code from this work is private, so the public repositories below 
 
 Both are on PyPI at version 0.1.0, MIT licensed, for Python 3.10 or newer.
 
-**[aiogram-stars](https://github.com/sinnercode228/aiogram-stars)** · Python, aiogram 3, SQLAlchemy, SQLite, PostgreSQL · [PyPI](https://pypi.org/project/aiogram-stars/) · `pip install aiogram-stars`\
+**[aiogram-stars](https://github.com/sinnercode228/aiogram-stars)** · Python, aiogram 3, SQLAlchemy, SQLite, PostgreSQL · [PyPI](https://pypi.org/project/aiogram-stars/) · [write-up](https://dev.to/sinnercode228/the-stars-were-charged-and-onpaid-never-ran-where-telegram-stars-payments-get-lost-in-aiogram-5m2) · `pip install aiogram-stars`\
 Telegram Stars payments for aiogram 3, extracted from the payment code of [Zernolist](https://github.com/sinnercode228/tg-shop-miniapp): signed invoice payloads, a pre-checkout answer within Telegram's 10-second deadline, and a refund outbox in SQLite or PostgreSQL that retries `refundStarPayment` on errors. `on_paid` runs once per charge: the payment row is [inserted with `ON CONFLICT (charge_id) DO NOTHING`](https://github.com/sinnercode228/aiogram-stars/blob/d601bc348503130979eee6c2313de45265dbb23d/src/aiogram_stars/sqlalchemy.py#L364-L369), only the handler whose insert went through calls it, and a test feeds one update three times to each of two dispatchers on one database.
 
 **[aioamocrm](https://github.com/sinnercode228/aioamocrm)** · Python, httpx, pydantic 2 · [PyPI](https://pypi.org/project/aioamocrm/) · `pip install aioamocrm`\
@@ -71,6 +71,7 @@ Smaller demos are in [portfolio](https://github.com/sinnercode228/portfolio): a 
 
 Write-ups on how specific parts of these projects work. Each one quotes the code, links to the lines at a pinned commit, then says what the tests cover and where the code is still thin. Index: [notes/](notes/).
 
+- [The Stars were charged and on_paid never ran: where Telegram Stars payments get lost in aiogram](https://dev.to/sinnercode228/the-stars-were-charged-and-onpaid-never-ran-where-telegram-stars-payments-get-lost-in-aiogram-5m2) (dev.to): a `wait_for` that let the pre-checkout answer leave after 11 s, a catch-all router that took the payment, a shutdown that cut `on_paid` off, and a 429 that burnt an attempt of every refund
 - [The trial balance was zero and the invoice was written off twice](notes/ledgerline-balanced-but-wrong.md): a retry loop working from stale invoice copies, and the invariants that catch what the trial balance cannot
 - [Two tabs, one slot: letting PostgreSQL refuse the second booking](notes/slotbook-exclusion-constraint.md): a check in Go that gave one slot to 14 of 20 requests, and the retry that stopped a deadlock from turning a `409` into a `500`
 - [Berlin on 29 March: booking slots across a DST change without adding 24 hours](notes/slotbook-dst-slots.md): dates walked on UTC midnights, and 23 vectors shared by Go and TypeScript
