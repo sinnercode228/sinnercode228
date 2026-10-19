@@ -85,12 +85,13 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-- Relay: a Telegram message over 4096 characters is cut through an HTML tag or entity, so Telegram rejects it with 400 and the delivery is dead-lettered ([issue #4](https://github.com/sinnercode228/integration-hub/issues/4), fix in [#5](https://github.com/sinnercode228/integration-hub/pull/5))
+_None right now._
 
 ## Recently fixed
 
 Bugs I found in my own projects, each fixed with a test that failed first:
 
+- Relay: a Telegram message over 4096 characters was cut on the raw string, so in HTML mode the cut could split an entity or leave a tag open, Telegram answered 400 and the delivery went to the dead letters; the limit now counts only visible text, as Telegram does, and tags still open at the cut are closed ([issue #4](https://github.com/sinnercode228/integration-hub/issues/4), [#5](https://github.com/sinnercode228/integration-hub/pull/5))
 - DocMind: a model that wrote citations as `[1, 2]` instead of `[1][2]` yielded an empty `cited` list and left every source card greyed out; the server regex and the client parser now split a bracket group into separate references ([issue #2](https://github.com/sinnercode228/docmind-rag/issues/2), [#3](https://github.com/sinnercode228/docmind-rag/pull/3))
 - Zernolist: a `pending` result from `openInvoice` was collapsed into `payment=cancelled` on the redirect, so the Mini App told the user the payment had been cancelled although the Stars charge might still land; the status is now carried through and the pending case has its own note ([issue #5](https://github.com/sinnercode228/tg-shop-miniapp/issues/5), [#6](https://github.com/sinnercode228/tg-shop-miniapp/pull/6))
 - Home AI flows: task owner resolved to the wrong attendee when two attendees shared a first name; the first-name fallback now only fires when exactly one attendee matches ([issue #3](https://github.com/sinnercode228/n8n-home-ai-workflows/issues/3), [#5](https://github.com/sinnercode228/n8n-home-ai-workflows/pull/5))
