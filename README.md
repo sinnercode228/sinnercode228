@@ -85,7 +85,7 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-_None right now._
+- Relay: a Telegram message over 4096 characters is cut through an HTML tag or entity, so Telegram rejects it with 400 and the delivery is dead-lettered ([issue #4](https://github.com/sinnercode228/integration-hub/issues/4), fix in [#5](https://github.com/sinnercode228/integration-hub/pull/5))
 
 ## Recently fixed
 
