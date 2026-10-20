@@ -63,7 +63,7 @@ The commercial code from this work is private, so the public repositories below 
 
 ## Libraries
 
-Both are on PyPI at version 0.1.0, MIT licensed, for Python 3.10 or newer.
+Both are on PyPI, MIT licensed, for Python 3.10 or newer: aiogram-stars at version 0.2.0, aioamocrm at 0.1.1.
 
 **[aiogram-stars](https://github.com/sinnercode228/aiogram-stars)** · Python, aiogram 3, SQLAlchemy, SQLite, PostgreSQL · [PyPI](https://pypi.org/project/aiogram-stars/) · [write-up](https://dev.to/sinnercode228/the-stars-were-charged-and-onpaid-never-ran-where-telegram-stars-payments-get-lost-in-aiogram-5m2) · `pip install aiogram-stars`\
 Telegram Stars payments for aiogram 3, extracted from the payment code of [Zernolist](https://github.com/sinnercode228/tg-shop-miniapp): signed invoice payloads, a pre-checkout answer within Telegram's 10-second deadline, and a refund outbox in SQLite or PostgreSQL that retries `refundStarPayment` on errors. `on_paid` runs once per charge: the payment row is [inserted with `ON CONFLICT (charge_id) DO NOTHING`](https://github.com/sinnercode228/aiogram-stars/blob/d601bc348503130979eee6c2313de45265dbb23d/src/aiogram_stars/sqlalchemy.py#L364-L369), only the handler whose insert went through calls it, and a test feeds one update three times to each of two dispatchers on one database.
@@ -165,7 +165,7 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 
 Коммерческий код из этой работы закрыт, поэтому открытые репозитории выше — самостоятельные проекты на выдуманных данных. README у них на английском; у всех, кроме Relay, есть русская версия или короткий пересказ по-русски.
 
-Две мои библиотеки на Python опубликованы на PyPI, обе пока в версии 0.1.0:
+Две мои библиотеки на Python опубликованы на PyPI, aiogram-stars в версии 0.2.0 и aioamocrm в версии 0.1.1:
 
 - [aiogram-stars](https://github.com/sinnercode228/aiogram-stars), [PyPI](https://pypi.org/project/aiogram-stars/): библиотека для оплаты в Telegram Stars в ботах на aiogram 3, которая подписывает payload счёта, успевает ответить на pre-checkout за десять секунд, вызывает `on_paid` один раз на платёж и повторяет неудавшиеся возвраты; я вынес её из платёжного кода Zernolist
 - [aioamocrm](https://github.com/sinnercode228/aioamocrm), [PyPI](https://pypi.org/project/aioamocrm/): асинхронный клиент API v4 amoCRM и Kommo, который сам обновляет OAuth2-токены и сохраняет новый refresh-токен, отправляет не больше 7 запросов в секунду, а запрос на запись, который мог уже выполниться, без `retry=True` не повторяет; вырос из коннектора amoCRM в Relay; форматы запросов и ответов сверены с официальным PHP SDK amoCRM, но живого аккаунта за тестами пока нет
