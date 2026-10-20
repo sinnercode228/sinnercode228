@@ -40,6 +40,11 @@ Cookieless web analytics and HTTP uptime monitoring in one dashboard, with a Hyp
 </tr>
 </table>
 
+## Upstream
+
+**[aiogram #1956](https://github.com/aiogram/aiogram/pull/1956)** · in review · fixes [issue #1955](https://github.com/aiogram/aiogram/issues/1955)\
+Adds an opt-in `tasks_shutdown_timeout` to `start_polling()` and `run_polling()`: when polling stops, the dispatcher waits up to that many seconds for update handlers that are still running; today shutdown goes ahead without them, although their updates have usually been confirmed to Telegram already.
+
 ## Experience
 
 **2025 – now · Senior Full-Stack Developer · Independent / Contract**\
@@ -164,6 +169,8 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 
 - [aiogram-stars](https://github.com/sinnercode228/aiogram-stars), [PyPI](https://pypi.org/project/aiogram-stars/): библиотека для оплаты в Telegram Stars в ботах на aiogram 3, которая подписывает payload счёта, успевает ответить на pre-checkout за десять секунд, вызывает `on_paid` один раз на платёж и повторяет неудавшиеся возвраты; я вынес её из платёжного кода Zernolist
 - [aioamocrm](https://github.com/sinnercode228/aioamocrm), [PyPI](https://pypi.org/project/aioamocrm/): асинхронный клиент API v4 amoCRM и Kommo, который сам обновляет OAuth2-токены и сохраняет новый refresh-токен, отправляет не больше 7 запросов в секунду, а запрос на запись, который мог уже выполниться, без `retry=True` не повторяет; вырос из коннектора amoCRM в Relay; форматы запросов и ответов сверены с официальным PHP SDK amoCRM, но живого аккаунта за тестами пока нет
+
+В aiogram на ревью мой PR [#1956](https://github.com/aiogram/aiogram/pull/1956) к [issue #1955](https://github.com/aiogram/aiogram/issues/1955): необязательный параметр `tasks_shutdown_timeout` в `start_polling()` и `run_polling()`. С ним при остановке polling диспетчер ждёт до заданного числа секунд обработчики, которые ещё работают, а сейчас остановка идёт, не дожидаясь их, хотя их апдейты обычно уже подтверждены Telegram.
 
 Ошибки, которые я нашёл у себя и исправил, каждую с тестом, который сначала падал, перечислены выше в разделе Recently fixed.
 
