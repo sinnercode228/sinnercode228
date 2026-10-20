@@ -1,5 +1,6 @@
 <p>
 <picture>
+  <source media="(max-width: 600px)" srcset="assets/banner-narrow.png">
   <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
   <img src="assets/banner-light.png" alt="sinnercode (sinnercode228 on GitHub), open to contract work. Full-stack developer, commercial web development since 2019. 2 Python libraries on PyPI: aiogram-stars and aioamocrm. 7 of 8 projects have a live demo on GitHub Pages, with no backend. Pull request #1956 to aiogram, adding tasks_shutdown_timeout, is in review." width="100%">
 </picture>
