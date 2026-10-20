@@ -11,8 +11,34 @@ I have done commercial web development since 2019. Now I build web products end 
 
 Open to contract work: a fixed-price project, hourly or monthly work, a seat on your team, or taking over an existing codebase.
 
-<a href="https://sinnercode228.github.io/pulse-analytics/"><img src="assets/pulse-live.webp" width="100%" alt="Pulse dashboard: the live feed, online counter and realtime bars updating"></a>
-<sub>Recorded from the <a href="https://sinnercode228.github.io/pulse-analytics/">Pulse demo</a> on GitHub Pages. The traffic is synthetic.</sub>
+## Featured
+
+<table>
+<tr>
+<td width="50%" valign="top">
+<a href="https://github.com/sinnercode228/aiogram-stars"><img src="assets/card-aiogram-stars.png" width="100%" alt="aiogram-stars: Telegram Stars payments for aiogram 3, pip install aiogram-stars, and the payment flow from pre_checkout_query to on_paid and refunds"></a><br>
+<b><a href="https://github.com/sinnercode228/aiogram-stars">aiogram-stars</a></b> · <a href="https://pypi.org/project/aiogram-stars/">PyPI</a><br>
+Telegram Stars payments for aiogram 3: calls <code>on_paid</code> once per charge and keeps refunds in your database until Telegram confirms them.
+</td>
+<td width="50%" valign="top">
+<a href="https://github.com/sinnercode228/aioamocrm"><img src="assets/card-aioamocrm.png" width="100%" alt="aioamocrm: async Python client for the amoCRM API v4 and Kommo, pip install aioamocrm, and a token refresh followed by a POST that is not resent after a 429"></a><br>
+<b><a href="https://github.com/sinnercode228/aioamocrm">aioamocrm</a></b> · <a href="https://pypi.org/project/aioamocrm/">PyPI</a><br>
+Async Python client for the amoCRM API v4 and Kommo, with retries that never send a write twice unless you ask.
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<a href="https://github.com/sinnercode228/slotbook"><img src="assets/card-slotbook.png" width="100%" alt="Slotbook: booking API where PostgreSQL rules out double booking, with the staff day calendar"></a><br>
+<b><a href="https://github.com/sinnercode228/slotbook">Slotbook</a></b> · <a href="https://sinnercode228.github.io/slotbook/">demo</a><br>
+Booking backend in Go: two customers can never book the same specialist for overlapping time, and PostgreSQL enforces it, not a check in Go.
+</td>
+<td width="50%" valign="top">
+<a href="https://github.com/sinnercode228/pulse-analytics"><img src="assets/card-pulse.png" width="100%" alt="Pulse: cookieless web analytics and uptime monitoring, with the traffic dashboard"></a><br>
+<b><a href="https://github.com/sinnercode228/pulse-analytics">Pulse</a></b> · <a href="https://sinnercode228.github.io/pulse-analytics/">demo</a><br>
+Cookieless web analytics and HTTP uptime monitoring in one dashboard, with a HyperLogLog visitor sketch in every rollup row.
+</td>
+</tr>
+</table>
 
 ## Experience
 
@@ -46,6 +72,9 @@ The demos run on GitHub Pages without a backend. The API is replaced by code in 
 
 **[Pulse](https://github.com/sinnercode228/pulse-analytics)** · TypeScript, Fastify, SQLite, React · [demo](https://sinnercode228.github.io/pulse-analytics/) · [write-up](notes/pulse-hyperloglog.md)\
 Cookieless web analytics with uptime monitoring. Each rollup row stores a [HyperLogLog sketch](https://github.com/sinnercode228/pulse-analytics/blob/96645e153317f7bc35e5fc17bf4f76424d83c7c3/packages/core/src/hll.ts#L3-L7): an exact set up to 512 hashes, then 2048 registers. That is how unique visitors are merged across time buckets.
+
+<a href="https://sinnercode228.github.io/pulse-analytics/"><img src="assets/pulse-live.webp" width="100%" alt="Pulse dashboard: the live feed, online counter and realtime bars updating"></a>
+<sub>Recorded from the <a href="https://sinnercode228.github.io/pulse-analytics/">Pulse demo</a> on GitHub Pages. The traffic is synthetic.</sub>
 
 **[Ledgerline](https://github.com/sinnercode228/ledgerline-billing)** · TypeScript, Fastify, PostgreSQL, React · [demo](https://sinnercode228.github.io/ledgerline-billing/) · [write-up](notes/ledgerline-balanced-but-wrong.md)\
 Subscription billing with trials, proration, gapless invoice numbers, dunning and a double-entry ledger. A [constraint trigger deferred to COMMIT](https://github.com/sinnercode228/ledgerline-billing/blob/442e27c08854c39821ade0cbfe7ebe67bffd2c1c/server/migrations/002_ledger_guards.sql#L7-L50) rejects any journal transaction whose entries do not sum to zero, whatever code wrote it. The demo runs the same engine in the browser, with a test clock that moves a day, a week or a month at a time.
