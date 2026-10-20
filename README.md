@@ -85,7 +85,7 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-_None right now._
+- DocMind: a document containing `</source>` could close its block in the prompt early and put the rest of the chunk outside the sources ([issue #4](https://github.com/sinnercode228/docmind-rag/issues/4), fix in review: [#5](https://github.com/sinnercode228/docmind-rag/pull/5))
 
 ## Recently fixed
 
