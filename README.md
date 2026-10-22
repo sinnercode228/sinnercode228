@@ -85,7 +85,7 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-_None right now._
+- FlowDesk: changing a deal's stage from the drawer sends `position: 0`, so the moved card lands on top of the target column and every other card shifts down ([issue #5](https://github.com/sinnercode228/flowdesk-crm/issues/5))
 
 ## Recently fixed
 
