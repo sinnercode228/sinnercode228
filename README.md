@@ -85,12 +85,13 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-- FlowDesk: changing a deal's stage from the drawer sends `position: 0`, so the moved card lands on top of the target column and every other card shifts down ([issue #5](https://github.com/sinnercode228/flowdesk-crm/issues/5))
+_None right now._
 
 ## Recently fixed
 
 Bugs I found in my own projects, each fixed with a test that failed first:
 
+- FlowDesk: changing a deal's stage from the drawer always sent `position: 0`, so the moved card jumped to the top of the target column and shoved every other card down by one; the drawer now counts the target column from the deals cache and sends that count, so the card lands at the end, and re-selecting the current stage is a no-op ([issue #5](https://github.com/sinnercode228/flowdesk-crm/issues/5), [#6](https://github.com/sinnercode228/flowdesk-crm/pull/6))
 - Pulse: hourly charts were bucketed on UTC hours whatever the site's zone, so on a half-hour zone (Asia/Kolkata, Asia/Tehran) every point sat 30 minutes off the local clock; hour buckets now align to the site zone the same way day buckets already did, and minute buckets stay UTC-floored because every zone offset is a whole number of minutes ([issue #6](https://github.com/sinnercode228/pulse-analytics/issues/6), [#7](https://github.com/sinnercode228/pulse-analytics/pull/7))
 - DocMind: the prompt escaped a source's title but not its text, so a document containing `</source>` could close its block early and put the rest of the chunk outside the sources; source tags inside the text are now escaped and the rest is left as is ([issue #4](https://github.com/sinnercode228/docmind-rag/issues/4), [#5](https://github.com/sinnercode228/docmind-rag/pull/5))
 - Relay: a Telegram message over 4096 characters was cut on the raw string, so in HTML mode the cut could split an entity or leave a tag open, Telegram answered 400 and the delivery went to the dead letters; the limit now counts only visible text, as Telegram does, and tags still open at the cut are closed ([issue #4](https://github.com/sinnercode228/integration-hub/issues/4), [#5](https://github.com/sinnercode228/integration-hub/pull/5))
