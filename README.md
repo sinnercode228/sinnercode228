@@ -125,7 +125,7 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-_None right now._
+- Relay: Google Sheets dead-letters an expired static `access_token` only after the full retry budget; `StaticTokenProvider.invalidate()` is a no-op so every retry sends the same dead token ([issue #6](https://github.com/sinnercode228/integration-hub/issues/6), [#7](https://github.com/sinnercode228/integration-hub/pull/7))
 
 ## Recently fixed
 
