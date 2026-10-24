@@ -2,6 +2,8 @@
 
 Write-ups on how specific parts of my public projects work. Each one quotes the code it describes and links to the exact lines at a fixed commit, then lists what the tests cover and where the code is still thin.
 
+- [The Stars were charged and on_paid never ran: where Telegram Stars payments get lost in aiogram](https://dev.to/sinnercode228/the-stars-were-charged-and-onpaid-never-ran-where-telegram-stars-payments-get-lost-in-aiogram-5m2) (dev.to)\
+  Nine bugs found in aiogram-stars before its first release, four in detail: an `asyncio.wait_for` that let the pre-checkout answer leave after 11 s, a catch-all router that took the payment message, a polling shutdown that cut `on_paid` off, and a 429 that burnt an attempt of every queued refund.
 - [The trial balance was zero and the invoice was written off twice](ledgerline-balanced-but-wrong.md)\
   Ledgerline's retry loop kept invoice copies across a call that wrote them off, so one invoice was written off twice while the trial balance stayed at zero. The journal from a run on the old code, the two invariants that compare the books with the invoices, the fix that re-reads each invoice under lock, and why the API cannot reach that state today.
 - [Two tabs, one slot: letting PostgreSQL refuse the second booking](slotbook-exclusion-constraint.md)\
@@ -27,6 +29,7 @@ Write-ups on how specific parts of my public projects work. Each one quotes the 
 
 Разборы того, как устроены отдельные части моих открытых проектов. В каждом я цитирую код со ссылками на строки в конкретном коммите, а в конце пишу, что покрывают тесты и где код пока слабый.
 
+- [Звёзды списаны, а on_paid не вызван: где теряются платежи Telegram Stars в aiogram](aiogram-stars-payments.ru.md)
 - [Оборотная ведомость сходилась в ноль, а счёт списали дважды](ledgerline-balanced-but-wrong.ru.md)
 - [Две вкладки, один слот: вторую запись отклоняет сам PostgreSQL](slotbook-exclusion-constraint.ru.md)
 - [Берлин, 29 марта: слоты записи при переводе часов без прибавления 24 часов](slotbook-dst-slots.ru.md)
