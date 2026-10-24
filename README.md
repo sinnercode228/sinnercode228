@@ -46,6 +46,9 @@ Cookieless web analytics and HTTP uptime monitoring in one dashboard, with a Hyp
 **[aiogram #1956](https://github.com/aiogram/aiogram/pull/1956)** · in review · fixes [issue #1955](https://github.com/aiogram/aiogram/issues/1955)\
 Adds an opt-in `tasks_shutdown_timeout` to `start_polling()` and `run_polling()`: when polling stops, the dispatcher waits up to that many seconds for update handlers that are still running; today shutdown goes ahead without them, although their updates have usually been confirmed to Telegram already.
 
+**[unstructured #4568](https://github.com/Unstructured-IO/unstructured/pull/4568)** · awaiting review · fixes [issue #3607](https://github.com/Unstructured-IO/unstructured/issues/3607)\
+`translate_text()` splits text longer than the model's window into chunks, but passed the whole text to the model for every chunk, so the first 512 tokens came out once per chunk and the rest of the text was dropped. Each chunk is now translated once, and a test with a fake model checks what the model receives.
+
 ## Experience
 
 **2025 – now · Senior Full-Stack Developer · Independent / Contract**\
@@ -174,6 +177,8 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 - [aioamocrm](https://github.com/sinnercode228/aioamocrm), [PyPI](https://pypi.org/project/aioamocrm/): асинхронный клиент API v4 amoCRM и Kommo, который сам обновляет OAuth2-токены и сохраняет новый refresh-токен, отправляет не больше 7 запросов в секунду, а запрос на запись, который мог уже выполниться, без `retry=True` не повторяет; вырос из коннектора amoCRM в Relay; форматы запросов и ответов сверены с официальным PHP SDK amoCRM, но живого аккаунта за тестами пока нет
 
 В aiogram на ревью мой PR [#1956](https://github.com/aiogram/aiogram/pull/1956) к [issue #1955](https://github.com/aiogram/aiogram/issues/1955): необязательный параметр `tasks_shutdown_timeout` в `start_polling()` и `run_polling()`. С ним при остановке polling диспетчер ждёт до заданного числа секунд обработчики, которые ещё работают, а сейчас остановка идёт, не дожидаясь их, хотя бот обычно уже подтвердил Telegram получение их апдейтов.
+
+В unstructured ждёт ревью мой PR [#4568](https://github.com/Unstructured-IO/unstructured/pull/4568) к [issue #3607](https://github.com/Unstructured-IO/unstructured/issues/3607): `translate_text()` делит длинный текст на части по окну модели, но в каждой итерации отдавал модели весь текст, поэтому первые 512 токенов переводились столько раз, сколько было частей, а остальной текст пропадал. Теперь каждая часть переводится один раз, и тест с подменённой моделью проверяет, что она получает.
 
 Ошибки, которые я нашёл у себя и исправил, каждую с тестом, который сначала падал, перечислены выше в разделе Recently fixed.
 
