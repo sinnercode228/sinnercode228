@@ -49,6 +49,15 @@ Adds an opt-in `tasks_shutdown_timeout` to `start_polling()` and `run_polling()`
 **[unstructured #4568](https://github.com/Unstructured-IO/unstructured/pull/4568)** · awaiting review · fixes [issue #3607](https://github.com/Unstructured-IO/unstructured/issues/3607)\
 `translate_text()` splits text longer than the model's window into chunks, but passed the whole text to the model for every chunk, so the first 512 tokens came out once per chunk and the rest of the text was dropped. Each chunk is now translated once, and a test with a fake model checks what the model receives.
 
+**[unstructured #4597](https://github.com/Unstructured-IO/unstructured/pull/4597)** · awaiting review\
+`partition_email()` failed with a bare `AssertionError` on an attached email (`message/rfc822`: a message forwarded as an attachment, a bounce, a digest), and the whole result was lost with it. The attached email is now partitioned like any other attachment.
+
+**[unstructured #4598](https://github.com/Unstructured-IO/unstructured/pull/4598)** · awaiting review\
+With `overlap_all=True`, splitting a long element could emit a chunk that held nothing but the overlap from the chunk before it: 2 of 19 chunks on the repository's War and Peace sample with 300-character chunks and an overlap of 40. The splitter now skips such a split.
+
+**[unstructured #4599](https://github.com/Unstructured-IO/unstructured/pull/4599)** · awaiting review · follow-up to [issue #3670](https://github.com/Unstructured-IO/unstructured/issues/3670)\
+A `.markdown` file was detected as plain text, or not at all without libmagic, although the issue was closed as fixed. It is now detected as Markdown.
+
 ## Experience
 
 **2025 – now · Senior Full-Stack Developer · Independent / Contract**\
@@ -179,6 +188,8 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 В aiogram на ревью мой PR [#1956](https://github.com/aiogram/aiogram/pull/1956) к [issue #1955](https://github.com/aiogram/aiogram/issues/1955): необязательный параметр `tasks_shutdown_timeout` в `start_polling()` и `run_polling()`. С ним при остановке polling диспетчер ждёт до заданного числа секунд обработчики, которые ещё работают, а сейчас остановка идёт, не дожидаясь их, хотя бот обычно уже подтвердил Telegram получение их апдейтов.
 
 В unstructured ждёт ревью мой PR [#4568](https://github.com/Unstructured-IO/unstructured/pull/4568) к [issue #3607](https://github.com/Unstructured-IO/unstructured/issues/3607): `translate_text()` делит длинный текст на части по окну модели, но в каждой итерации отдавал модели весь текст, поэтому первые 512 токенов переводились столько раз, сколько было частей, а остальной текст пропадал. Теперь каждая часть переводится один раз, и тест с подменённой моделью проверяет, что она получает.
+
+Там же ждут ревью ещё три моих исправления: [#4597](https://github.com/Unstructured-IO/unstructured/pull/4597) — `partition_email()` падал с `AssertionError` на вложенном письме (`message/rfc822`: пересланное вложением письмо, отчёт о недоставке, дайджест) и терял весь результат; [#4598](https://github.com/Unstructured-IO/unstructured/pull/4598) — с `overlap_all=True` при разбиении длинного элемента появлялся чанк, в котором было только перекрытие с предыдущим; [#4599](https://github.com/Unstructured-IO/unstructured/pull/4599) — файл `.markdown` определялся как обычный текст, хотя [issue #3670](https://github.com/Unstructured-IO/unstructured/issues/3670) закрыли как исправленный.
 
 Ошибки, которые я нашёл у себя и исправил, каждую с тестом, который сначала падал, перечислены выше в разделе Recently fixed.
 
