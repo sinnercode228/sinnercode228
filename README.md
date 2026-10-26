@@ -43,20 +43,23 @@ Cookieless web analytics and HTTP uptime monitoring in one dashboard, with a Hyp
 
 ## Upstream
 
-**[aiogram #1956](https://github.com/aiogram/aiogram/pull/1956)** · in review · fixes [issue #1955](https://github.com/aiogram/aiogram/issues/1955)\
-Adds an opt-in `tasks_shutdown_timeout` to `start_polling()` and `run_polling()`: when polling stops, the dispatcher waits up to that many seconds for update handlers that are still running; today shutdown goes ahead without them, although their updates have usually been confirmed to Telegram already.
-
 **[unstructured #4568](https://github.com/Unstructured-IO/unstructured/pull/4568)** · merged · fixes [issue #3607](https://github.com/Unstructured-IO/unstructured/issues/3607)\
 `translate_text()` splits text longer than the model's window into chunks, but passed the whole text to the model for every chunk, so the first 512 tokens came out once per chunk and the rest of the text was dropped. Each chunk is now translated once, and a test with a fake model checks what the model receives.
 
-**[unstructured #4597](https://github.com/Unstructured-IO/unstructured/pull/4597)** · awaiting review\
-`partition_email()` failed with a bare `AssertionError` on an attached email (`message/rfc822`: a message forwarded as an attachment, a bounce, a digest), and the whole result was lost with it. The attached email is now partitioned like any other attachment.
+**[unstructured #4597](https://github.com/Unstructured-IO/unstructured/pull/4597)** · merged\
+`partition_email()` failed with a bare `AssertionError` on an attached email (`message/rfc822`: a message forwarded as an attachment, a bounce, a digest), and the whole result was lost with it. The attached email is now partitioned like any other attachment, and each of its parts reaches its partitioner with the exact bytes it was sent with.
+
+**[unstructured #4599](https://github.com/Unstructured-IO/unstructured/pull/4599)** · merged · follow-up to [issue #3670](https://github.com/Unstructured-IO/unstructured/issues/3670)\
+A `.markdown` file was detected as plain text, or not at all without libmagic, although the issue was closed as fixed. It is now detected as Markdown.
+
+**[unstructured #4602](https://github.com/Unstructured-IO/unstructured/pull/4602)** · merged · fixes [issue #3985](https://github.com/Unstructured-IO/unstructured/issues/3985)\
+With `analysis=True`, `partition_pdf()` drew its debug bounding-box overlays on pages rendered at the default 350 DPI, whatever `pdf_image_dpi` the partitioning used, so the boxes landed in the wrong place; for an encrypted PDF no overlays were written at all. The overlays now use the same DPI and password as the partitioning.
 
 **[unstructured #4598](https://github.com/Unstructured-IO/unstructured/pull/4598)** · awaiting review\
 With `overlap_all=True`, splitting a long element could emit a chunk that held nothing but the overlap from the chunk before it: 2 of 19 chunks on the repository's War and Peace sample with 300-character chunks and an overlap of 40. The splitter now skips such a split.
 
-**[unstructured #4599](https://github.com/Unstructured-IO/unstructured/pull/4599)** · merged · follow-up to [issue #3670](https://github.com/Unstructured-IO/unstructured/issues/3670)\
-A `.markdown` file was detected as plain text, or not at all without libmagic, although the issue was closed as fixed. It is now detected as Markdown.
+**[aiogram #1956](https://github.com/aiogram/aiogram/pull/1956)** · in review · fixes [issue #1955](https://github.com/aiogram/aiogram/issues/1955)\
+Adds an opt-in `tasks_shutdown_timeout` to `start_polling()` and `run_polling()`: when polling stops, the dispatcher waits up to that many seconds for update handlers that are still running; today shutdown goes ahead without them, although their updates have usually been confirmed to Telegram already.
 
 ## Experience
 
@@ -192,7 +195,7 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 
 В unstructured приняли мой PR [#4568](https://github.com/Unstructured-IO/unstructured/pull/4568) к [issue #3607](https://github.com/Unstructured-IO/unstructured/issues/3607): `translate_text()` делит длинный текст на части по окну модели, но в каждой итерации отдавал модели весь текст, поэтому первые 512 токенов переводились столько раз, сколько было частей, а остальной текст пропадал. Теперь каждая часть переводится один раз, и тест с подменённой моделью проверяет, что она получает.
 
-Там же приняли [#4599](https://github.com/Unstructured-IO/unstructured/pull/4599): файл `.markdown` определялся как обычный текст, хотя [issue #3670](https://github.com/Unstructured-IO/unstructured/issues/3670) закрыли как исправленный. Ждут ревью ещё два моих исправления: [#4597](https://github.com/Unstructured-IO/unstructured/pull/4597) — `partition_email()` падал с `AssertionError` на вложенном письме (`message/rfc822`: пересланное вложением письмо, отчёт о недоставке, дайджест) и терял весь результат; [#4598](https://github.com/Unstructured-IO/unstructured/pull/4598) — с `overlap_all=True` при разбиении длинного элемента появлялся чанк, в котором было только перекрытие с предыдущим.
+Там же приняли ещё три моих исправления: [#4597](https://github.com/Unstructured-IO/unstructured/pull/4597) — `partition_email()` падал с `AssertionError` на вложенном письме (`message/rfc822`: пересланное вложением письмо, отчёт о недоставке, дайджест) и терял весь результат; [#4599](https://github.com/Unstructured-IO/unstructured/pull/4599) — файл `.markdown` определялся как обычный текст, хотя [issue #3670](https://github.com/Unstructured-IO/unstructured/issues/3670) закрыли как исправленный; [#4602](https://github.com/Unstructured-IO/unstructured/pull/4602) — с `analysis=True` отладочные рамки `partition_pdf()` рисовались на страницах в 350 DPI по умолчанию, а не в том `pdf_image_dpi`, с которым шло разбиение, и съезжали. Ждёт ревью [#4598](https://github.com/Unstructured-IO/unstructured/pull/4598): с `overlap_all=True` при разбиении длинного элемента появлялся чанк, в котором было только перекрытие с предыдущим.
 
 Ошибки, которые я нашёл у себя и исправил, каждую с тестом, который сначала падал, перечислены выше в разделе Recently fixed.
 
