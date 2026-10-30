@@ -143,7 +143,7 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-_None right now._
+- DocMind: a chat follow-up is retrieved on the bare question — the history reaches the model but not the retriever, so "what does it cost?" is embedded with no idea what "it" is and pulls back the wrong chunks ([issue #8](https://github.com/sinnercode228/docmind-rag/issues/8), fix in [#9](https://github.com/sinnercode228/docmind-rag/pull/9))
 
 ## Recently fixed
 
