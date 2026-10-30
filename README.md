@@ -143,12 +143,13 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-- Zernolist: the order page offered to pay again right after a successful Stars payment, because the bot had not confirmed it yet ([#9](https://github.com/sinnercode228/tg-shop-miniapp/issues/9), PR [#10](https://github.com/sinnercode228/tg-shop-miniapp/pull/10) ready)
+_None right now._
 
 ## Recently fixed
 
 Bugs I found in my own projects, each fixed with a test that failed first:
 
+- Zernolist: right after a successful Stars payment the order page offered to pay again, because the bot had not marked the order paid yet; the page now re-reads the order every 1.5 s, up to 8 times, with the main button in progress, and checkout tells it to wait too ([issue #9](https://github.com/sinnercode228/tg-shop-miniapp/issues/9), [#10](https://github.com/sinnercode228/tg-shop-miniapp/pull/10))
 - FlowDesk: changing a deal's stage from the drawer always sent `position: 0`, so the moved card jumped to the top of the target column and shoved every other card down by one; the drawer now counts the target column from the deals cache and sends that count, so the card lands at the end, and re-selecting the current stage is a no-op ([issue #5](https://github.com/sinnercode228/flowdesk-crm/issues/5), [#6](https://github.com/sinnercode228/flowdesk-crm/pull/6))
 - Pulse: hourly charts were bucketed on UTC hours whatever the site's zone, so on a half-hour zone (Asia/Kolkata, Asia/Tehran) every point sat 30 minutes off the local clock; hour buckets now align to the site zone the same way day buckets already did, and minute buckets stay UTC-floored because every zone offset is a whole number of minutes ([issue #6](https://github.com/sinnercode228/pulse-analytics/issues/6), [#7](https://github.com/sinnercode228/pulse-analytics/pull/7))
 - DocMind: the prompt escaped a source's title but not its text, so a document containing `</source>` could close its block early and put the rest of the chunk outside the sources; source tags inside the text are now escaped and the rest is left as is ([issue #4](https://github.com/sinnercode228/docmind-rag/issues/4), [#5](https://github.com/sinnercode228/docmind-rag/pull/5))
