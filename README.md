@@ -143,12 +143,13 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-- DocMind: a chat follow-up is retrieved on the bare question — the history reaches the model but not the retriever, so "what does it cost?" is embedded with no idea what "it" is and pulls back the wrong chunks ([issue #8](https://github.com/sinnercode228/docmind-rag/issues/8), fix in [#9](https://github.com/sinnercode228/docmind-rag/pull/9))
+_None right now._
 
 ## Recently fixed
 
 Bugs I found in my own projects, each fixed with a test that failed first:
 
+- DocMind: a chat follow-up was retrieved on the bare question — the history reached the model but not the retriever, so "what does it cost?" was embedded with no idea what "it" was and pulled back the wrong chunks; the retrieval query now carries the recent user turns, while the prompt and the citation highlight still use the original question ([issue #8](https://github.com/sinnercode228/docmind-rag/issues/8), [#9](https://github.com/sinnercode228/docmind-rag/pull/9))
 - Zernolist: right after a successful Stars payment the order page offered to pay again, because the bot had not marked the order paid yet; the page now re-reads the order every 1.5 s, up to 8 times, with the main button in progress, and checkout tells it to wait too ([issue #9](https://github.com/sinnercode228/tg-shop-miniapp/issues/9), [#10](https://github.com/sinnercode228/tg-shop-miniapp/pull/10))
 - FlowDesk: changing a deal's stage from the drawer always sent `position: 0`, so the moved card jumped to the top of the target column and shoved every other card down by one; the drawer now counts the target column from the deals cache and sends that count, so the card lands at the end, and re-selecting the current stage is a no-op ([issue #5](https://github.com/sinnercode228/flowdesk-crm/issues/5), [#6](https://github.com/sinnercode228/flowdesk-crm/pull/6))
 - Pulse: hourly charts were bucketed on UTC hours whatever the site's zone, so on a half-hour zone (Asia/Kolkata, Asia/Tehran) every point sat 30 minutes off the local clock; hour buckets now align to the site zone the same way day buckets already did, and minute buckets stay UTC-floored because every zone offset is a whole number of minutes ([issue #6](https://github.com/sinnercode228/pulse-analytics/issues/6), [#7](https://github.com/sinnercode228/pulse-analytics/pull/7))
