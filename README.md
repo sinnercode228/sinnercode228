@@ -143,7 +143,7 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-_None right now._
+- Zernolist: the order page offered to pay again right after a successful Stars payment, because the bot had not confirmed it yet ([#9](https://github.com/sinnercode228/tg-shop-miniapp/issues/9), PR [#10](https://github.com/sinnercode228/tg-shop-miniapp/pull/10) ready)
 
 ## Recently fixed
 
