@@ -146,7 +146,7 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-_None right now._
+- n8n home workflows: `useServerFallbacks: false` drops `fallbacks` from the Claude request body, but both Claude HTTP nodes still send a static `anthropic-beta: server-side-fallback-2026-07-01` header, so the switch only half works ([issue #8](https://github.com/sinnercode228/n8n-home-ai-workflows/issues/8), fix in [#9](https://github.com/sinnercode228/n8n-home-ai-workflows/pull/9))
 
 ## Recently fixed
 
