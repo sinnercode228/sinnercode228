@@ -146,12 +146,13 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-- n8n home workflows: `useServerFallbacks: false` drops `fallbacks` from the Claude request body, but both Claude HTTP nodes still send a static `anthropic-beta: server-side-fallback-2026-07-01` header, so the switch only half works ([issue #8](https://github.com/sinnercode228/n8n-home-ai-workflows/issues/8), fix in [#9](https://github.com/sinnercode228/n8n-home-ai-workflows/pull/9))
+_None right now._
 
 ## Recently fixed
 
 Bugs I found in my own projects, each fixed with a test that failed first:
 
+- n8n home workflows: `useServerFallbacks: false` dropped `fallbacks` from the Claude request body, but both Claude HTTP nodes still sent a static `anthropic-beta: server-side-fallback-2026-07-01` header; the headers are now built next to the request and the nodes send them from the item, so the header and the body field are on or off together ([issue #8](https://github.com/sinnercode228/n8n-home-ai-workflows/issues/8), [#9](https://github.com/sinnercode228/n8n-home-ai-workflows/pull/9))
 - DocMind: a chat follow-up was retrieved on the bare question — the history reached the model but not the retriever, so "what does it cost?" was embedded with no idea what "it" was and pulled back the wrong chunks; the retrieval query now carries the recent user turns, while the prompt and the citation highlight still use the original question ([issue #8](https://github.com/sinnercode228/docmind-rag/issues/8), [#9](https://github.com/sinnercode228/docmind-rag/pull/9))
 - Zernolist: right after a successful Stars payment the order page offered to pay again, because the bot had not marked the order paid yet; the page now re-reads the order every 1.5 s, up to 8 times, with the main button in progress, and checkout tells it to wait too ([issue #9](https://github.com/sinnercode228/tg-shop-miniapp/issues/9), [#10](https://github.com/sinnercode228/tg-shop-miniapp/pull/10))
 - FlowDesk: changing a deal's stage from the drawer always sent `position: 0`, so the moved card jumped to the top of the target column and shoved every other card down by one; the drawer now counts the target column from the deals cache and sends that count, so the card lands at the end, and re-selecting the current stage is a no-op ([issue #5](https://github.com/sinnercode228/flowdesk-crm/issues/5), [#6](https://github.com/sinnercode228/flowdesk-crm/pull/6))
