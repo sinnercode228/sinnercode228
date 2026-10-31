@@ -2,7 +2,7 @@
 <picture>
   <source media="(max-width: 600px)" srcset="assets/banner-narrow.png">
   <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
-  <img src="assets/banner-light.png" alt="sinnercode (sinnercode228 on GitHub), open to contract work. Full-stack developer, commercial web development since 2019. 2 Python libraries on PyPI: aiogram-stars and aioamocrm. 7 of 8 projects have a live demo on GitHub Pages, with no backend. Pull request #1956 to aiogram, adding tasks_shutdown_timeout, is in review." width="100%">
+  <img src="assets/banner-light.png" alt="sinnercode (sinnercode228 on GitHub), open to contract work. Full-stack developer, commercial web development since 2019. 2 Python libraries on PyPI: aiogram-stars and aioamocrm. 7 of 8 projects have a live demo on GitHub Pages, with no backend. 6 pull requests merged upstream into aiogram and unstructured." width="100%">
 </picture>
 </p>
 
@@ -43,6 +43,12 @@ Cookieless web analytics and HTTP uptime monitoring in one dashboard, with a Hyp
 
 ## Upstream
 
+**[aiogram #1954](https://github.com/aiogram/aiogram/pull/1954)** · merged · fixes [issue #1423](https://github.com/aiogram/aiogram/issues/1423)\
+`InlineKeyboardBuilder.as_markup()` silently dropped the options passed to it. It now passes them on, and both keyboard builders declare the markup options as typed keyword arguments, so IDEs and type checkers can complete and check them.
+
+**[aiogram #1956](https://github.com/aiogram/aiogram/pull/1956)** · merged · fixes [issue #1955](https://github.com/aiogram/aiogram/issues/1955)\
+Adds an opt-in `tasks_shutdown_timeout` to `start_polling()` and `run_polling()`: when polling stops, the dispatcher waits up to that many seconds for update handlers that are still running. By default, as before, shutdown goes ahead without waiting for them, although their updates have usually been confirmed to Telegram already.
+
 **[unstructured #4568](https://github.com/Unstructured-IO/unstructured/pull/4568)** · merged · fixes [issue #3607](https://github.com/Unstructured-IO/unstructured/issues/3607)\
 `translate_text()` splits text longer than the model's window into chunks, but passed the whole text to the model for every chunk, so the first 512 tokens came out once per chunk and the rest of the text was dropped. Each chunk is now translated once, and a test with a fake model checks what the model receives.
 
@@ -57,9 +63,6 @@ With `analysis=True`, `partition_pdf()` drew its debug bounding-box overlays on 
 
 **[unstructured #4598](https://github.com/Unstructured-IO/unstructured/pull/4598)** · awaiting review\
 With `overlap_all=True`, splitting a long element could emit a chunk that held nothing but the overlap from the chunk before it: 2 of 19 chunks on the repository's War and Peace sample with 300-character chunks and an overlap of 40. The splitter now skips such a split.
-
-**[aiogram #1956](https://github.com/aiogram/aiogram/pull/1956)** · in review · fixes [issue #1955](https://github.com/aiogram/aiogram/issues/1955)\
-Adds an opt-in `tasks_shutdown_timeout` to `start_polling()` and `run_polling()`: when polling stops, the dispatcher waits up to that many seconds for update handlers that are still running; today shutdown goes ahead without them, although their updates have usually been confirmed to Telegram already.
 
 ## Experience
 
@@ -193,7 +196,7 @@ Telegram [@sinnercode](https://t.me/sinnercode) · [portfolio](https://sinnercod
 - [aiogram-stars](https://github.com/sinnercode228/aiogram-stars), [PyPI](https://pypi.org/project/aiogram-stars/): библиотека для оплаты в Telegram Stars в ботах на aiogram 3, которая подписывает payload счёта, успевает ответить на pre-checkout за десять секунд, вызывает `on_paid` один раз на платёж и повторяет неудавшиеся возвраты; я вынес её из платёжного кода Zernolist
 - [aioamocrm](https://github.com/sinnercode228/aioamocrm), [PyPI](https://pypi.org/project/aioamocrm/): асинхронный клиент API v4 amoCRM и Kommo, который сам обновляет OAuth2-токены и сохраняет новый refresh-токен, отправляет не больше 7 запросов в секунду, а запрос на запись, который мог уже выполниться, без `retry=True` не повторяет; вырос из коннектора amoCRM в Relay; форматы запросов и ответов сверены с официальным PHP SDK amoCRM, но живого аккаунта за тестами пока нет
 
-В aiogram на ревью мой PR [#1956](https://github.com/aiogram/aiogram/pull/1956) к [issue #1955](https://github.com/aiogram/aiogram/issues/1955): необязательный параметр `tasks_shutdown_timeout` в `start_polling()` и `run_polling()`. С ним при остановке polling диспетчер ждёт до заданного числа секунд обработчики, которые ещё работают, а сейчас остановка идёт, не дожидаясь их, хотя бот обычно уже подтвердил Telegram получение их апдейтов.
+В aiogram приняли два моих PR. [#1954](https://github.com/aiogram/aiogram/pull/1954) к [issue #1423](https://github.com/aiogram/aiogram/issues/1423) исправляет `InlineKeyboardBuilder.as_markup()`, который молча отбрасывал переданные ему параметры. Теперь он передаёт их в `InlineKeyboardMarkup`, а в обоих билдерах клавиатур параметры разметки объявлены явно, как именованные аргументы с типами, так что IDE их подсказывают, а тайпчекеры проверяют. [#1956](https://github.com/aiogram/aiogram/pull/1956) к [issue #1955](https://github.com/aiogram/aiogram/issues/1955) добавляет необязательный параметр `tasks_shutdown_timeout` в `start_polling()` и `run_polling()`: с ним при остановке polling диспетчер ждёт до заданного числа секунд обработчики, которые ещё работают. По умолчанию, как и раньше, остановка идёт, не дожидаясь их, хотя бот обычно уже подтвердил Telegram получение их апдейтов.
 
 В unstructured приняли мой PR [#4568](https://github.com/Unstructured-IO/unstructured/pull/4568) к [issue #3607](https://github.com/Unstructured-IO/unstructured/issues/3607): `translate_text()` делит длинный текст на части по окну модели, но в каждой итерации отдавал модели весь текст, поэтому первые 512 токенов переводились столько раз, сколько было частей, а остальной текст пропадал. Теперь каждая часть переводится один раз, и тест с подменённой моделью проверяет, что она получает.
 
