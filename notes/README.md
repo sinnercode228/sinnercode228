@@ -2,6 +2,8 @@
 
 Write-ups on how specific parts of my public projects work. Each one quotes the code it describes and links to the exact lines at a fixed commit, then lists what the tests cover and where the code is still thin.
 
+Bugs found and fixed in these projects are logged in [fixes.md](fixes.md).
+
 - [The Stars were charged and on_paid never ran: where Telegram Stars payments get lost in aiogram](https://dev.to/sinnercode228/the-stars-were-charged-and-onpaid-never-ran-where-telegram-stars-payments-get-lost-in-aiogram-5m2) (dev.to)\
   Nine bugs found in aiogram-stars before its first release, four in detail: an `asyncio.wait_for` that let the pre-checkout answer leave after 11 s, a catch-all router that took the payment message, a polling shutdown that cut `on_paid` off, and a 429 that burnt an attempt of every queued refund.
 - [The trial balance was zero and the invoice was written off twice](ledgerline-balanced-but-wrong.md)\
