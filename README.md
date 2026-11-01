@@ -146,7 +146,7 @@ Write-ups on how specific parts of these projects work. Each one quotes the code
 
 ## Open issues
 
-_None right now._
+- DocMind: DOCX tables are attached to the last section instead of where they appear ([#10](https://github.com/sinnercode228/docmind-rag/issues/10), PR [#11](https://github.com/sinnercode228/docmind-rag/pull/11) ready)
 
 ## Recently fixed
 
