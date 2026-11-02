@@ -2,7 +2,7 @@
 <picture>
   <source media="(max-width: 600px)" srcset="assets/banner-narrow.png">
   <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
-  <img src="assets/banner-light.png" alt="sinnercode (sinnercode228 on GitHub), open to contract work. Full-stack developer, commercial web development since 2019. 2 Python libraries on PyPI: aiogram-stars and aioamocrm. 7 of 8 projects have a live demo on GitHub Pages, with no backend. 6 pull requests merged upstream into aiogram and unstructured." width="100%">
+  <img src="assets/banner-light.png" alt="sinnercode (sinnercode228 on GitHub), open to contract work. Full-stack developer, commercial web development since 2019. 6 pull requests merged upstream into aiogram and unstructured. 2 Python libraries on PyPI: aiogram-stars and aioamocrm. Telegram bots, payments and CRM: aiogram, Stars, YooKassa, amoCRM." width="100%">
 </picture>
 </p>
 
@@ -37,7 +37,7 @@ Telegram Stars payments for aiogram 3, extracted from Zernolist. <code>on_paid</
 <td width="50%" valign="top">
 <a href="https://github.com/sinnercode228/aioamocrm"><img src="assets/card-aioamocrm.png" width="100%" alt="aioamocrm: async Python client for the amoCRM API v4 and Kommo, pip install aioamocrm, and a token refresh followed by a POST that is not resent after a 429"></a><br>
 <b><a href="https://github.com/sinnercode228/aioamocrm">aioamocrm</a></b> 0.1.1 · <a href="https://pypi.org/project/aioamocrm/">PyPI</a><br>
-Async client for the amoCRM and Kommo API v4, grown out of Relay. Handles OAuth2 token rotation and limits requests to 7 per second. A <code>POST</code> is resent only with <code>retry=True</code>, because amoCRM has no idempotency keys. Tested on mocked HTTP, not a live account.
+Async client for the amoCRM and Kommo API v4. Handles OAuth2 token rotation and limits requests to 7 per second. A <code>POST</code> is resent only with <code>retry=True</code>, because amoCRM has no idempotency keys. Tested on mocked HTTP, not a live account.
 </td>
 </tr>
 </table>
@@ -46,29 +46,16 @@ Async client for the amoCRM and Kommo API v4, grown out of Relay. Handles OAuth2
 
 Client code from my contract work is private, so these are standalone projects with sample data. The demos run on GitHub Pages with the API mocked in the browser.
 
-- **[Zernolist](https://github.com/sinnercode228/tg-shop-miniapp)** · React, aiogram 3, FastAPI · [demo](https://sinnercode228.github.io/tg-shop-miniapp/) · [write-up](notes/zernolist-stars-payments.md)\
-  A coffee and tea shop as a Telegram Mini App, paid in Stars or on receipt. Order totals are computed on the server from the catalog, never taken from the client.
 - **[tg-paid-club](https://github.com/sinnercode228/tg-paid-club)** · Python, aiogram 3, FastAPI, PostgreSQL\
   Paid access to a private Telegram channel or group, with YooKassa card renewals, Stars subscriptions and a 3-day grace period after a declined card. Only paying members' join requests are approved. No live deployment: a simulator fills the admin dashboard with sample members.
-- **[Relay](https://github.com/sinnercode228/integration-hub)** · Python, FastAPI, Redis, React · [demo](https://sinnercode228.github.io/integration-hub/) · [write-up](notes/relay-redis-lease-queue.md)\
-  Webhooks from Tilda, amoCRM and Bitrix24, delivered to Telegram, Google Sheets, amoCRM and email. Workers lease jobs from a Redis queue, and a dead worker's jobs return to the queue when the lease runs out.
-- **[FlowDesk](https://github.com/sinnercode228/flowdesk-crm)** · Next.js, Fastify, Prisma, PostgreSQL · [demo](https://sinnercode228.github.io/flowdesk-crm/) · [write-up](notes/flowdesk-refresh-rotation.md)\
-  CRM with a deals kanban and roles. Refresh tokens rotate, and replaying an old one revokes every token from that login.
+- **[Zernolist](https://github.com/sinnercode228/tg-shop-miniapp)** · React, aiogram 3, FastAPI · [demo](https://sinnercode228.github.io/tg-shop-miniapp/) · [write-up](notes/zernolist-stars-payments.md)\
+  A coffee and tea shop as a Telegram Mini App, paid in Stars or on receipt. Order totals are computed on the server from the catalog, never taken from the client. Stars payments go through aiogram-stars.
 - **[Slotbook](https://github.com/sinnercode228/slotbook)** · Go, PostgreSQL, React · [demo](https://sinnercode228.github.io/slotbook/) · [write-up](notes/slotbook-exclusion-constraint.md)\
   Online booking for salons, with a booking widget and a staff day view. A PostgreSQL exclusion constraint prevents double booking under concurrent requests.
-- **[Ledgerline](https://github.com/sinnercode228/ledgerline-billing)** · TypeScript, Fastify, PostgreSQL, React · [demo](https://sinnercode228.github.io/ledgerline-billing/) · [write-up](notes/ledgerline-balanced-but-wrong.md)\
-  Subscription billing with trials, proration, gapless invoice numbers and dunning. The double-entry ledger rejects any transaction that doesn't balance at COMMIT.
-- **[Pulse](https://github.com/sinnercode228/pulse-analytics)** · TypeScript, Fastify, SQLite, React · [demo](https://sinnercode228.github.io/pulse-analytics/) · [write-up](notes/pulse-hyperloglog.md)\
-  Cookieless web analytics and uptime monitoring in one dashboard. Unique visitors are counted with HyperLogLog.
 - **[DocMind](https://github.com/sinnercode228/docmind-rag)** · Python, FastAPI, pgvector, React · [demo](https://sinnercode228.github.io/docmind-rag/) · [write-up](notes/docmind-sources-before-tokens.md)\
   Q&A with citations over PDF, DOCX, HTML and web pages, also as a Telegram bot. Sources are sent before the answer, so each `[n]` is clickable as it streams. The demo searches with BM25 in the browser, without an LLM.
 
-<table>
-<tr>
-<td width="50%" valign="top"><a href="https://sinnercode228.github.io/pulse-analytics/"><img src="assets/pulse-live.webp" width="100%" alt="Pulse dashboard: the live feed, online counter and realtime bars updating"></a><br><sub>Pulse demo, synthetic traffic</sub></td>
-<td width="50%" valign="top"><a href="https://sinnercode228.github.io/docmind-rag/"><img src="assets/docmind-answer.webp" width="100%" alt="DocMind demo: a question, the answer streaming with [1] and [2], and the matching source cards highlighted"></a><br><sub>DocMind demo</sub></td>
-</tr>
-</table>
+<a href="https://sinnercode228.github.io/docmind-rag/"><img src="assets/docmind-answer.webp" width="100%" alt="DocMind demo: a question, the answer streaming with [1] and [2], and the matching source cards highlighted"></a>
 
 Smaller demos are in [portfolio](https://github.com/sinnercode228/portfolio): a landing page with a cost calculator, an async scraper, a lead-collection bot and an Excel dashboard.
 
