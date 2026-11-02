@@ -4,7 +4,7 @@ Bugs I found in my public projects and fixed. Each entry links to the issue, pul
 
 ## Open issues
 
-_None right now._
+- FlowDesk: `npm run db:seed -w server` wipes users and refresh tokens by default; only the Docker entrypoint passes `--if-empty` ([issue #7](https://github.com/sinnercode228/flowdesk-crm/issues/7), fix in [#8](https://github.com/sinnercode228/flowdesk-crm/pull/8))
 
 ## Recently fixed
 
