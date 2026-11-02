@@ -2,7 +2,7 @@
 <picture>
   <source media="(max-width: 600px)" srcset="assets/banner-narrow.png">
   <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
-  <img src="assets/banner-light.png" alt="sinnercode (sinnercode228 on GitHub), open to contract work. Full-stack developer, commercial web development since 2019. 6 pull requests merged upstream into aiogram and unstructured. 2 Python libraries on PyPI: aiogram-stars and aioamocrm. Telegram bots, payments and CRM: aiogram, Stars, YooKassa, amoCRM." width="100%">
+  <img src="assets/banner-light.png" alt="sinnercode (sinnercode228 on GitHub), open to contract work. Full-stack developer, commercial web development since 2019. 6 pull requests merged upstream into aiogram and unstructured. 3 Python libraries on PyPI: aiogram-stars, aioamocrm and aiomoysklad. Telegram bots, payments and CRM: aiogram, Stars, YooKassa, amoCRM." width="100%">
 </picture>
 </p>
 
@@ -25,7 +25,7 @@ Available for contract work (fixed price, hourly or monthly), including joining 
 
 ## Libraries
 
-Both are on PyPI, MIT licensed, for Python 3.10+.
+All three are on PyPI, MIT licensed, for Python 3.10+.
 
 <table>
 <tr>
@@ -41,6 +41,9 @@ Async client for the amoCRM and Kommo API v4. Handles OAuth2 token rotation and 
 </td>
 </tr>
 </table>
+
+**[aiomoysklad](https://github.com/sinnercode228/aiomoysklad)** 0.1.0 · [PyPI](https://pypi.org/project/aiomoysklad/)\
+Async client for the MoySklad JSON API 1.2 that keeps to its limits: request weights per token kind, including the change on 1 December 2026, at most 5 requests in flight, retries on 429 from the Lognex headers, and a stop before the automatic cut-off. Covers stock reports, customer orders and webhooks. Tested on mocked HTTP, not a live account yet.
 
 ## Projects
 
@@ -82,7 +85,7 @@ Websites and online stores for small businesses: an auto parts store with CSV im
 Full-stack разработчик, в коммерческой разработке с 2019 года. Делаю веб-продукты с нуля и дорабатываю существующие: API и базы данных, онлайн-запись, биллинг подписок, интеграции с amoCRM и Bitrix24, Telegram-боты и Mini Apps, функции на LLM.
 
 - Приняты шесть моих PR: два в aiogram ([#1954](https://github.com/aiogram/aiogram/pull/1954), [#1956](https://github.com/aiogram/aiogram/pull/1956)) и четыре в unstructured ([#4568](https://github.com/Unstructured-IO/unstructured/pull/4568), [#4597](https://github.com/Unstructured-IO/unstructured/pull/4597), [#4599](https://github.com/Unstructured-IO/unstructured/pull/4599), [#4602](https://github.com/Unstructured-IO/unstructured/pull/4602)).
-- На PyPI две мои библиотеки: [aiogram-stars](https://pypi.org/project/aiogram-stars/) для приёма платежей в Telegram Stars в aiogram 3 и [aioamocrm](https://pypi.org/project/aioamocrm/), асинхронный клиент API amoCRM и Kommo.
+- На PyPI три мои библиотеки: [aiogram-stars](https://pypi.org/project/aiogram-stars/) для приёма платежей в Telegram Stars в aiogram 3, [aioamocrm](https://pypi.org/project/aioamocrm/), асинхронный клиент API amoCRM и Kommo, и [aiomoysklad](https://pypi.org/project/aiomoysklad/), асинхронный клиент API МойСклада, который соблюдает его лимиты на запросы.
 - Технические разборы проектов на русском: [notes/](notes/README.md#по-русски).
 
 Работаю по фиксированной цене, почасово или помесячно. Могу подключиться к вашей команде или взять на поддержку существующий проект.
