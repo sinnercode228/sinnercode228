@@ -2,12 +2,9 @@
 
 Bugs I found in my public projects and fixed. Each entry links to the issue, pull request or commit. Back to the [profile](../README.md) or the [notes](README.md).
 
-## Open issues
-
-- FlowDesk: `npm run db:seed -w server` wipes users and refresh tokens by default; only the Docker entrypoint passes `--if-empty` ([issue #7](https://github.com/sinnercode228/flowdesk-crm/issues/7), fix in [#8](https://github.com/sinnercode228/flowdesk-crm/pull/8))
-
 ## Recently fixed
 
+- FlowDesk: `npm run db:seed -w server` wiped users and refresh tokens by default, and only the Docker entrypoint passed `--if-empty`; the seed now refuses a non-empty database unless `--reset` is passed ([issue #7](https://github.com/sinnercode228/flowdesk-crm/issues/7), [#8](https://github.com/sinnercode228/flowdesk-crm/pull/8))
 - DocMind: DOCX tables were read after all paragraphs, so every table row landed in the last section under the last heading and a section holding only a table vanished; the loader now walks the body in document order, so each table stays under its own heading ([issue #10](https://github.com/sinnercode228/docmind-rag/issues/10), [#11](https://github.com/sinnercode228/docmind-rag/pull/11))
 - n8n home workflows: `useServerFallbacks: false` dropped `fallbacks` from the LLM request body, but both LLM HTTP nodes still sent a static `server-side-fallback-2026-07-01` beta header; the headers are now built next to the request and the nodes send them from the item, so the header and the body field are on or off together ([issue #8](https://github.com/sinnercode228/n8n-home-ai-workflows/issues/8), [#9](https://github.com/sinnercode228/n8n-home-ai-workflows/pull/9))
 - DocMind: a chat follow-up was retrieved on the bare question — the history reached the model but not the retriever, so "what does it cost?" was embedded with no idea what "it" was and pulled back the wrong chunks; the retrieval query now carries the recent user turns, while the prompt and the citation highlight still use the original question ([issue #8](https://github.com/sinnercode228/docmind-rag/issues/8), [#9](https://github.com/sinnercode228/docmind-rag/pull/9))
