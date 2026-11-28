@@ -2,7 +2,7 @@
 <picture>
   <source media="(max-width: 600px)" srcset="assets/banner-narrow.png">
   <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
-  <img src="assets/banner-light.png" alt="sinnercode (sinnercode228 on GitHub), open to work. Python backend developer, commercial web development since 2019. 9 pull requests merged upstream into aiogram, unstructured, trafilatura and cashews. 3 Python libraries on PyPI: aiogram-stars, aioamocrm and aiomoysklad. Telegram bots, payments and CRM: aiogram, Stars, YooKassa, amoCRM." width="100%">
+  <img src="assets/banner-light.png" alt="sinnercode (sinnercode228 on GitHub), open to work. Python backend developer, commercial web development since 2019. 10 pull requests merged upstream into aiogram, unstructured, pyTelegramBotAPI, trafilatura and cashews. 3 Python libraries on PyPI: aiogram-stars, aioamocrm and aiomoysklad. Telegram bots, payments and CRM: aiogram, Stars, YooKassa, amoCRM." width="100%">
 </picture>
 </p>
 
@@ -18,6 +18,7 @@ Python backend developer (FastAPI, asyncio, PostgreSQL, Redis), in commercial we
 |---|---|
 | [aiogram #1954](https://github.com/aiogram/aiogram/pull/1954) | `InlineKeyboardBuilder.as_markup()` no longer drops its options. Fixes [#1423](https://github.com/aiogram/aiogram/issues/1423) |
 | [aiogram #1956](https://github.com/aiogram/aiogram/pull/1956) | Opt-in `tasks_shutdown_timeout`, so polling shutdown can wait for running handlers. Fixes [#1955](https://github.com/aiogram/aiogram/issues/1955) |
+| [pyTelegramBotAPI #2657](https://github.com/eternnoir/pyTelegramBotAPI/pull/2657) | The sync `TextFilter` with `ignore_case=True` lowers every condition, not only the first one set, so `starts_with` and `ends_with` together match as in the asyncio filter |
 | [unstructured #4568](https://github.com/Unstructured-IO/unstructured/pull/4568) | `translate_text()` no longer repeats the first 512 tokens for every chunk. Fixes [#3607](https://github.com/Unstructured-IO/unstructured/issues/3607) |
 | [unstructured #4597](https://github.com/Unstructured-IO/unstructured/pull/4597) | `partition_email()` no longer fails on attached emails (`message/rfc822`) |
 | [unstructured #4598](https://github.com/Unstructured-IO/unstructured/pull/4598) | Chunking with `overlap_all=True` no longer emits a chunk that holds only the overlap |
@@ -26,7 +27,7 @@ Python backend developer (FastAPI, asyncio, PostgreSQL, Redis), in commercial we
 | [trafilatura #1027](https://github.com/adbar/trafilatura/pull/1027) | `fetch_url()` retries a urllib3 read error once, without backoff, instead of waiting several times `DOWNLOAD_TIMEOUT`. Fixes [#1016](https://github.com/adbar/trafilatura/issues/1016) |
 | [cashews #437](https://github.com/Krukov/cashews/pull/437) | `CacheEtagMiddleware` no longer fails on a cached `StreamingResponse` or gives every streaming endpoint the same ETag. Fixes [#428](https://github.com/Krukov/cashews/issues/428) |
 
-In review: [sqladmin #1150](https://github.com/smithyhq/sqladmin/pull/1150) (approved), [taskiq #692](https://github.com/taskiq-python/taskiq/pull/692), [taskiq #698](https://github.com/taskiq-python/taskiq/pull/698), [tortoise-orm #2395](https://github.com/tortoise/tortoise-orm/pull/2395).
+In review: [sqladmin #1150](https://github.com/smithyhq/sqladmin/pull/1150) (approved), [taskiq #692](https://github.com/taskiq-python/taskiq/pull/692), [taskiq #698](https://github.com/taskiq-python/taskiq/pull/698), [tortoise-orm #2395](https://github.com/tortoise/tortoise-orm/pull/2395), [pyTelegramBotAPI #2656](https://github.com/eternnoir/pyTelegramBotAPI/pull/2656), [cashews #450](https://github.com/Krukov/cashews/pull/450).
 
 ## Libraries
 
@@ -89,7 +90,7 @@ Websites and online stores for small businesses: an auto parts store with CSV im
 
 Python-бэкенд разработчик (FastAPI, asyncio, PostgreSQL, Redis), в коммерческой разработке с 2019 года, на фронтенде работаю с TypeScript и React. Делаю веб-продукты с нуля и дорабатываю существующие: API и базы данных, онлайн-запись, биллинг подписок, интеграции с amoCRM и Bitrix24, Telegram-боты и Mini Apps, функции на LLM.
 
-- Приняты девять моих PR: два в aiogram ([#1954](https://github.com/aiogram/aiogram/pull/1954), [#1956](https://github.com/aiogram/aiogram/pull/1956)), пять в unstructured ([#4568](https://github.com/Unstructured-IO/unstructured/pull/4568), [#4597](https://github.com/Unstructured-IO/unstructured/pull/4597), [#4598](https://github.com/Unstructured-IO/unstructured/pull/4598), [#4599](https://github.com/Unstructured-IO/unstructured/pull/4599), [#4602](https://github.com/Unstructured-IO/unstructured/pull/4602)) и по одному в trafilatura ([#1027](https://github.com/adbar/trafilatura/pull/1027)) и cashews ([#437](https://github.com/Krukov/cashews/pull/437)).
+- Приняты десять моих PR: два в aiogram ([#1954](https://github.com/aiogram/aiogram/pull/1954), [#1956](https://github.com/aiogram/aiogram/pull/1956)), пять в unstructured ([#4568](https://github.com/Unstructured-IO/unstructured/pull/4568), [#4597](https://github.com/Unstructured-IO/unstructured/pull/4597), [#4598](https://github.com/Unstructured-IO/unstructured/pull/4598), [#4599](https://github.com/Unstructured-IO/unstructured/pull/4599), [#4602](https://github.com/Unstructured-IO/unstructured/pull/4602)) и по одному в pyTelegramBotAPI ([#2657](https://github.com/eternnoir/pyTelegramBotAPI/pull/2657)), trafilatura ([#1027](https://github.com/adbar/trafilatura/pull/1027)) и cashews ([#437](https://github.com/Krukov/cashews/pull/437)).
 - На PyPI три мои библиотеки: [aiogram-stars](https://pypi.org/project/aiogram-stars/) для приёма платежей в Telegram Stars в aiogram 3, [aioamocrm](https://pypi.org/project/aioamocrm/), асинхронный клиент API amoCRM и Kommo, и [aiomoysklad](https://pypi.org/project/aiomoysklad/), асинхронный клиент API МойСклада, который соблюдает его лимиты на запросы.
 - Технические разборы проектов на русском: [notes/](notes/README.md#по-русски).
 
