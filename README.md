@@ -2,15 +2,15 @@
 <picture>
   <source media="(max-width: 600px)" srcset="assets/banner-narrow.png">
   <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
-  <img src="assets/banner-light.png" alt="sinnercode (sinnercode228 on GitHub), open to contract work. Full-stack developer, commercial web development since 2019. 9 pull requests merged upstream into aiogram, unstructured, trafilatura and cashews. 3 Python libraries on PyPI: aiogram-stars, aioamocrm and aiomoysklad. Telegram bots, payments and CRM: aiogram, Stars, YooKassa, amoCRM." width="100%">
+  <img src="assets/banner-light.png" alt="sinnercode (sinnercode228 on GitHub), open to work. Python backend developer, commercial web development since 2019. 9 pull requests merged upstream into aiogram, unstructured, trafilatura and cashews. 3 Python libraries on PyPI: aiogram-stars, aioamocrm and aiomoysklad. Telegram bots, payments and CRM: aiogram, Stars, YooKassa, amoCRM." width="100%">
 </picture>
 </p>
 
 [Portfolio](https://sinnercode228.github.io/portfolio/?lang=en) · Telegram [@sinnercode](https://t.me/sinnercode) · [PyPI](https://pypi.org/user/sinnercode/) · [dev.to](https://dev.to/sinnercode228) · [По-русски](#по-русски)
 
-Full-stack developer, in commercial web development since 2019. I build web products from scratch and work on existing ones: APIs, booking and subscription billing, CRM integrations, Telegram bots and Mini Apps, LLM features.
+Python backend developer (FastAPI, asyncio, PostgreSQL, Redis), in commercial web development since 2019, and at home with TypeScript and React on the frontend. I build and maintain APIs, booking and subscription billing, CRM integrations, Telegram bots and Mini Apps, LLM features.
 
-Available for contract work (fixed price, hourly or monthly), including joining your team or taking over an existing codebase. Telegram: [@sinnercode](https://t.me/sinnercode).
+**Open to full-time and contract roles, remote.** I can join your team, own a backend service, or take over an existing codebase. Telegram: [@sinnercode](https://t.me/sinnercode).
 
 ## Merged upstream
 
@@ -87,12 +87,12 @@ Websites and online stores for small businesses: an auto parts store with CSV im
 
 ## По-русски
 
-Full-stack разработчик, в коммерческой разработке с 2019 года. Делаю веб-продукты с нуля и дорабатываю существующие: API и базы данных, онлайн-запись, биллинг подписок, интеграции с amoCRM и Bitrix24, Telegram-боты и Mini Apps, функции на LLM.
+Python-бэкенд разработчик (FastAPI, asyncio, PostgreSQL, Redis), в коммерческой разработке с 2019 года, на фронтенде работаю с TypeScript и React. Делаю веб-продукты с нуля и дорабатываю существующие: API и базы данных, онлайн-запись, биллинг подписок, интеграции с amoCRM и Bitrix24, Telegram-боты и Mini Apps, функции на LLM.
 
 - Приняты девять моих PR: два в aiogram ([#1954](https://github.com/aiogram/aiogram/pull/1954), [#1956](https://github.com/aiogram/aiogram/pull/1956)), пять в unstructured ([#4568](https://github.com/Unstructured-IO/unstructured/pull/4568), [#4597](https://github.com/Unstructured-IO/unstructured/pull/4597), [#4598](https://github.com/Unstructured-IO/unstructured/pull/4598), [#4599](https://github.com/Unstructured-IO/unstructured/pull/4599), [#4602](https://github.com/Unstructured-IO/unstructured/pull/4602)) и по одному в trafilatura ([#1027](https://github.com/adbar/trafilatura/pull/1027)) и cashews ([#437](https://github.com/Krukov/cashews/pull/437)).
 - На PyPI три мои библиотеки: [aiogram-stars](https://pypi.org/project/aiogram-stars/) для приёма платежей в Telegram Stars в aiogram 3, [aioamocrm](https://pypi.org/project/aioamocrm/), асинхронный клиент API amoCRM и Kommo, и [aiomoysklad](https://pypi.org/project/aiomoysklad/), асинхронный клиент API МойСклада, который соблюдает его лимиты на запросы.
 - Технические разборы проектов на русском: [notes/](notes/README.md#по-русски).
 
-Работаю по фиксированной цене, почасово или помесячно. Могу подключиться к вашей команде или взять на поддержку существующий проект.
+**Ищу работу в штате или на контракте, удалённо.** Могу подключиться к команде, вести бэкенд-сервис или взять на поддержку существующий проект.
 
 Telegram: [@sinnercode](https://t.me/sinnercode) · [Портфолио](https://sinnercode228.github.io/portfolio/)
